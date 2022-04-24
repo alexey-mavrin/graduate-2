@@ -62,13 +62,14 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 				http.StatusFound,
 				"User Already Exists",
 			)
-		} else {
-			resp.Status = "error"
-			writeStatus(w,
-				http.StatusBadRequest,
-				"Cannot Add User",
-			)
+			return
 		}
+		resp.Status = "error"
+		writeStatus(w,
+			http.StatusBadRequest,
+			"Cannot Add User",
+		)
+		return
 	}
 
 	err = json.NewEncoder(w).Encode(resp)

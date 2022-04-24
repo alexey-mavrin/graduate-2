@@ -98,6 +98,32 @@ func TestStore_AddUser(t *testing.T) {
 	})
 }
 
+func TestStore_CheckUserAuth(t *testing.T) {
+	store := dropCreateStore(t)
+	t.Run("Check user auth", func(t *testing.T) {
+		user := "user1"
+		wrongUser := "user2"
+		pass := "pass1"
+		wrongPass := "pass2"
+		_, err := store.AddUser(User{
+			Name:     user,
+			Password: pass,
+		})
+		assert.NoError(t, err)
+
+		ok, err := store.CheckUserAuth(user, pass)
+		assert.NoError(t, err)
+		assert.True(t, ok)
+
+		ok, err = store.CheckUserAuth(user, wrongPass)
+		assert.NoError(t, err)
+		assert.False(t, ok)
+
+		ok, err = store.CheckUserAuth(wrongUser, pass)
+		assert.Error(t, err)
+	})
+}
+
 func TestStore_GetAccount(t *testing.T) {
 	store := dropCreateStore(t)
 	t.Run("Get single accounts", func(t *testing.T) {

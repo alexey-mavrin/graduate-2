@@ -14,6 +14,8 @@ import (
 const (
 	// ListenAddress  is the address the server listen to
 	ListenAddress = ":8080"
+	// registerPath is the path to serve requests to register new users
+	registerPath = "/users/"
 )
 
 func writeStatus(w http.ResponseWriter, code int, status string) {
@@ -22,7 +24,6 @@ func writeStatus(w http.ResponseWriter, code int, status string) {
 }
 
 func checkSetContentType(next http.Handler) http.Handler {
-
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
@@ -80,6 +81,7 @@ func NewRouter() chi.Router {
 	r := chi.NewRouter()
 
 	r.Use(checkSetContentType)
+	r.Use(authUser)
 
 	r.Post("/users/", createUser)
 	// r.Post("/accounts/", storeAccount)

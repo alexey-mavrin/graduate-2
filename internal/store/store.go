@@ -137,7 +137,32 @@ func (s *Store) isUserExists(userName string) (bool, error) {
 		return true, nil
 	}
 	return false, nil
+}
 
+// CheckUserAuth checks the user password match
+func (s *Store) CheckUserAuth(userName string, userPass string) (bool, error) {
+
+	row := secretStore.db.QueryRow(
+		`SELECT password_hash FROM users WHERE user = ?`,
+		userName,
+	)
+
+	var dbPasswordHash string
+	err := row.Scan(&dbPasswordHash)
+	if err == sql.ErrNoRows {
+		return false, ErrNotFound
+	}
+	if err != nil {
+		return false, err
+	}
+	hash := sha256.Sum256([]byte(userPass))
+	passwordHash := hex.EncodeToString(hash[:])
+
+	if dbPasswordHash == passwordHash {
+		return true, nil
+	}
+
+	return false, nil
 }
 
 // AddUser creates user account

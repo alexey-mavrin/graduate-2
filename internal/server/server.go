@@ -84,6 +84,7 @@ func NewRouter() chi.Router {
 	r.Use(authUser)
 
 	r.Post("/users/", createUser)
+	r.Get("/ping/", pingHandler)
 	// r.Post("/accounts/", storeAccount)
 	// r.Get("/accounts/", listAccounts)
 	// r.Get("/accounts/{id}", listAccount)

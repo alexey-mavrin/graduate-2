@@ -59,7 +59,7 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, store.ErrAlreadyExists) {
 			resp.Status = "already exists"
 			writeStatus(w,
-				http.StatusFound,
+				http.StatusBadRequest,
 				"User Already Exists",
 			)
 			return

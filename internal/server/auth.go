@@ -28,12 +28,17 @@ func authUser(next http.Handler) http.Handler {
 			userOK, err := verifyUser(user, pass)
 			if err != nil {
 				log.Printf("verifyUser error: %v", err)
+				writeStatus(w,
+					http.StatusForbidden,
+					"Access Denied",
+				)
 				return
 			}
 			if !userOK {
-				http.Error(w,
-					"Access Denied",
+				log.Printf("verifyUser: password incorrect")
+				writeStatus(w,
 					http.StatusForbidden,
+					"Access Denied",
 				)
 				return
 			}
@@ -48,9 +53,22 @@ func authUser(next http.Handler) http.Handler {
 				return
 			}
 			w.Header().Set("WWW-Authenticate", `Basic realm="storeapi"`)
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			writeStatus(w,
+				http.StatusUnauthorized,
+				"Unauthorized",
+			)
 			return
 		}
 
 	})
+}
+
+func pingHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("ping")
+	user, _, ok := r.BasicAuth()
+	if !ok {
+		writeStatus(w, http.StatusBadRequest, "no basic auth")
+		return
+	}
+	writeStatus(w, http.StatusOK, "OK. User: "+user)
 }

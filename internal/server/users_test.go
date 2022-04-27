@@ -63,7 +63,7 @@ func Test_createUser(t *testing.T) {
 			resp, body := testHTTPRequest(t,
 				ts,
 				tt.method,
-				"/users/",
+				"/users",
 				tt.body,
 				tt.user,
 				tt.pass,
@@ -89,7 +89,7 @@ func Test_pingHandler(t *testing.T) {
 	resp, _ := testHTTPRequest(t,
 		ts,
 		http.MethodPost,
-		"/users/",
+		"/users",
 		body,
 		// empty user and pass
 		"",
@@ -101,7 +101,7 @@ func Test_pingHandler(t *testing.T) {
 	resp1, _ := testHTTPRequest(t,
 		ts,
 		http.MethodGet,
-		"/ping/",
+		"/ping",
 		"",
 		// correct user and pass
 		"user1",
@@ -113,7 +113,7 @@ func Test_pingHandler(t *testing.T) {
 	resp2, _ := testHTTPRequest(t,
 		ts,
 		http.MethodGet,
-		"/ping/",
+		"/ping",
 		"",
 		// incorrect user and pass
 		"user1",

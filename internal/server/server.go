@@ -15,7 +15,7 @@ const (
 	// ListenAddress  is the address the server listen to
 	ListenAddress = ":8080"
 	// registerPath is the path to serve requests to register new users
-	registerPath = "/users/"
+	registerPath = "/users"
 )
 
 func writeStatus(w http.ResponseWriter, code int, status string) {
@@ -83,13 +83,13 @@ func NewRouter() chi.Router {
 	r.Use(checkSetContentType)
 	r.Use(authUser)
 
-	r.Post("/users/", createUser)
-	r.Get("/ping/", pingHandler)
-	r.Post("/accounts/", storeAccount)
-	// r.Get("/accounts/", listAccounts)
-	// r.Get("/accounts/{id}", listAccount)
-	// r.Put("/accounts/{id}", updateAccount)
-	// r.Delete("/accounts/{id}", deleteAccount)
+	r.Post("/users", createUser)
+	r.Get("/ping", pingHandler)
+	r.Post("/accounts", storeUpdateAccount)
+	r.Get("/accounts", listAccounts)
+	r.Get("/accounts/{id}", getDeleteAccount)
+	r.Put("/accounts/{id}", storeUpdateAccount)
+	r.Delete("/accounts/{id}", getDeleteAccount)
 
 	return r
 }

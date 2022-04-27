@@ -1,0 +1,88 @@
+=== RUN   Test_storeAccount
+=== RUN   Test_storeAccount/Store_account_record
+    accounts_test.go:40: 
+        	Error Trace:	accounts_test.go:40
+        	Error:      	Not equal: 
+        	            	expected: 200
+        	            	actual  : 401
+        	Test:       	Test_storeAccount/Store_account_record
+2022/04/27 16:02:12 verifyUser error: Record not found
+    accounts_test.go:52: 
+        	Error Trace:	accounts_test.go:52
+        	Error:      	Not equal: 
+        	            	expected: 200
+        	            	actual  : 403
+        	Test:       	Test_storeAccount/Store_account_record
+--- FAIL: Test_storeAccount (0.03s)
+    --- FAIL: Test_storeAccount/Store_account_record (0.03s)
+=== RUN   Test_createUser
+=== RUN   Test_createUser/Create_a_user
+    users_test.go:72: 
+        	Error Trace:	users_test.go:72
+        	Error:      	Not equal: 
+        	            	expected: 200
+        	            	actual  : 401
+        	Test:       	Test_createUser/Create_a_user
+    users_test.go:76: 
+        	Error Trace:	users_test.go:76
+        	Error:      	Not equal: 
+        	            	expected: server.AddUserResponse{Name:"user1", Status:"OK", ID:1}
+        	            	actual  : server.AddUserResponse{Name:"", Status:"Unauthorized", ID:0}
+        	            	
+        	            	Diff:
+        	            	--- Expected
+        	            	+++ Actual
+        	            	@@ -1,5 +1,5 @@
+        	            	 (server.AddUserResponse) {
+        	            	- Name: (string) (len=5) "user1",
+        	            	- Status: (string) (len=2) "OK",
+        	            	- ID: (int64) 1
+        	            	+ Name: (string) "",
+        	            	+ Status: (string) (len=12) "Unauthorized",
+        	            	+ ID: (int64) 0
+        	            	 }
+        	Test:       	Test_createUser/Create_a_user
+=== RUN   Test_createUser/Create_the_same_user_twice
+    users_test.go:72: 
+        	Error Trace:	users_test.go:72
+        	Error:      	Not equal: 
+        	            	expected: 400
+        	            	actual  : 401
+        	Test:       	Test_createUser/Create_the_same_user_twice
+    users_test.go:76: 
+        	Error Trace:	users_test.go:76
+        	Error:      	Not equal: 
+        	            	expected: server.AddUserResponse{Name:"", Status:"User Already Exists", ID:0}
+        	            	actual  : server.AddUserResponse{Name:"", Status:"Unauthorized", ID:0}
+        	            	
+        	            	Diff:
+        	            	--- Expected
+        	            	+++ Actual
+        	            	@@ -2,3 +2,3 @@
+        	            	  Name: (string) "",
+        	            	- Status: (string) (len=19) "User Already Exists",
+        	            	+ Status: (string) (len=12) "Unauthorized",
+        	            	  ID: (int64) 0
+        	Test:       	Test_createUser/Create_the_same_user_twice
+--- FAIL: Test_createUser (0.00s)
+    --- FAIL: Test_createUser/Create_a_user (0.00s)
+    --- FAIL: Test_createUser/Create_the_same_user_twice (0.00s)
+=== RUN   Test_pingHandler
+    users_test.go:99: 
+        	Error Trace:	users_test.go:99
+        	Error:      	Not equal: 
+        	            	expected: 200
+        	            	actual  : 401
+        	Test:       	Test_pingHandler
+2022/04/27 16:02:12 verifyUser error: Record not found
+    users_test.go:111: 
+        	Error Trace:	users_test.go:111
+        	Error:      	Not equal: 
+        	            	expected: 200
+        	            	actual  : 403
+        	Test:       	Test_pingHandler
+2022/04/27 16:02:12 verifyUser error: Record not found
+--- FAIL: Test_pingHandler (0.03s)
+FAIL
+exit status 1
+FAIL	github.com/alexey-mavrin/graduate-2/internal/server	0.061s

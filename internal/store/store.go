@@ -304,6 +304,9 @@ func (s *Store) GetAccount(user string, id int64) (Account, error) {
 	)
 
 	err := row.Scan(&acc.Name, &acc.URL, &acc.UserName, &acc.Password)
+	if err == sql.ErrNoRows {
+		return acc, ErrNotFound
+	}
 	if err != nil {
 		return acc, err
 	}

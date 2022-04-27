@@ -1,5 +1,5 @@
 #!/bin/bash
 
-curl -v -X GET http://localhost:8080/ping \
+curl -v -X DELETE http://localhost:8080/accounts/1 \
    -H 'Content-Type: application/json' \
    -u "user:my_password"

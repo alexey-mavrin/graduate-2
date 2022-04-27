@@ -47,7 +47,8 @@ func authUser(next http.Handler) http.Handler {
 		}
 
 		if !basicSet {
-			if r.URL.Path == registerPath {
+			if r.URL.Path == registerPath ||
+				r.URL.Path == registerPath+"/" {
 				// registering does not require user auth
 				next.ServeHTTP(w, r)
 				return

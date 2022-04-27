@@ -39,9 +39,10 @@ type User struct {
 
 // Account holds account data for some resource
 type Account struct {
-	URL      string
-	UserName string
-	Password string
+	Name     string `json:"name"`
+	URL      string `json:"url"`
+	UserName string `json:"user_name"`
+	Password string `json:"password"`
 }
 
 // Accounts holds list of accounts indexed by id
@@ -107,6 +108,7 @@ func NewStore() (*Store, error) {
 	_, err = secretStore.db.Exec(`CREATE TABLE IF NOT EXISTS accounts (
 		id INTEGER PRIMARY KEY,
 		user_id INTEGER NOT NULL,
+		name TEXT NOT NULL,
 		url TEXT,
 		user_name TEXT,
 		password TEXT,
@@ -206,9 +208,10 @@ func (s *Store) StoreAccount(user string, account Account) (int64, error) {
 	defer storeMutex.Unlock()
 
 	res, err := secretStore.db.Exec(`INSERT INTO accounts
-		(user_id, url, user_name, password)
-		VALUES((SELECT id from users where user=?), ?, ?, ?)`,
+		(user_id, name, url, user_name, password)
+		VALUES((SELECT id from users where user=?), ?, ?, ?, ?)`,
 		user,
+		account.Name,
 		account.URL,
 		account.UserName,
 		account.Password,
@@ -230,11 +233,12 @@ func (s *Store) UpdateAccount(user string, id int64, account Account) error {
 	defer storeMutex.Unlock()
 
 	res, err := secretStore.db.Exec(`UPDATE accounts
-		SET url = ?, user_name = ?, password = ?
+		SET name = ?, url = ?, user_name = ?, password = ?
 		WHERE id in
 		( SELECT accounts.id FROM accounts
 			JOIN users ON accounts.user_id = users.id
 			WHERE users.user = ? AND accounts.id = ?)`,
+		account.Name,
 		account.URL,
 		account.UserName,
 		account.Password,
@@ -264,7 +268,7 @@ func (s *Store) GetAccounts(user string) (Accounts, error) {
 
 	accs := make(Accounts)
 	rows, err := secretStore.db.Query(
-		`SELECT accounts.id, accounts.url, accounts.user_name
+		`SELECT accounts.id, accounts.name, accounts.url, accounts.user_name
 			FROM accounts JOIN users ON accounts.user_id = users.id
 			WHERE users.user = ?`,
 		user,
@@ -276,7 +280,7 @@ func (s *Store) GetAccounts(user string) (Accounts, error) {
 	for rows.Next() {
 		var id int64
 		var acc Account
-		err = rows.Scan(&id, &acc.URL, &acc.UserName)
+		err = rows.Scan(&id, &acc.Name, &acc.URL, &acc.UserName)
 		if err != nil {
 			return accs, err
 		}
@@ -293,13 +297,13 @@ func (s *Store) GetAccount(user string, id int64) (Account, error) {
 	var acc Account
 
 	row := secretStore.db.QueryRow(
-		`SELECT accounts.url, accounts.user_name, accounts.password
+		`SELECT accounts.name, accounts.url, accounts.user_name, accounts.password
 			FROM accounts JOIN users ON accounts.user_id = users.id
 			WHERE users.user = ? AND accounts.id = ?`,
 		user, id,
 	)
 
-	err := row.Scan(&acc.URL, &acc.UserName, &acc.Password)
+	err := row.Scan(&acc.Name, &acc.URL, &acc.UserName, &acc.Password)
 	if err != nil {
 		return acc, err
 	}

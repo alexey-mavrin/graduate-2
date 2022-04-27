@@ -126,10 +126,11 @@ func TestStore_CheckUserAuth(t *testing.T) {
 
 func TestStore_GetAccount(t *testing.T) {
 	store := dropCreateStore(t)
-	t.Run("Get single accounts", func(t *testing.T) {
+	t.Run("Get single account", func(t *testing.T) {
 		user := "user1"
 
 		acc := Account{
+			Name:     "local host",
 			URL:      "http://localhost",
 			UserName: user,
 			Password: "secret1000",
@@ -154,6 +155,8 @@ func TestStore_GetAccounts(t *testing.T) {
 	store := dropCreateStore(t)
 	t.Run("Get multiple accounts", func(t *testing.T) {
 		user := "user1"
+		name1 := "local host"
+		name2 := "local host alt"
 		url1 := "http://localhost"
 		url2 := "http://localhost:8080"
 
@@ -164,12 +167,14 @@ func TestStore_GetAccounts(t *testing.T) {
 
 		id1, err := store.StoreAccount(user, Account{
 			UserName: user,
+			Name:     name1,
 			URL:      url1,
 		})
 		assert.NoError(t, err)
 
 		id2, err := store.StoreAccount(user, Account{
 			UserName: user,
+			Name:     name2,
 			URL:      url2,
 		})
 		assert.NoError(t, err)
@@ -180,10 +185,12 @@ func TestStore_GetAccounts(t *testing.T) {
 		wantAccs := make(Accounts)
 		wantAccs[id1] = Account{
 			UserName: user,
+			Name:     name1,
 			URL:      url1,
 		}
 		wantAccs[id2] = Account{
 			UserName: user,
+			Name:     name2,
 			URL:      url2,
 		}
 
@@ -198,6 +205,7 @@ func TestStore_DeleteAccount(t *testing.T) {
 
 		acc := Account{
 			URL:      "http://localhost",
+			Name:     "local host",
 			UserName: user,
 			Password: "secret1000",
 		}
@@ -227,6 +235,7 @@ func TestStore_UpdateAccount(t *testing.T) {
 	store := dropCreateStore(t)
 	t.Run("Update account record", func(t *testing.T) {
 		user := "user1"
+		name := "local host"
 		url1 := "http://localhost"
 		url2 := "http://localhost:8080"
 
@@ -237,6 +246,7 @@ func TestStore_UpdateAccount(t *testing.T) {
 
 		id, err := store.StoreAccount(user, Account{
 			URL:      url1,
+			Name:     name,
 			UserName: user,
 		})
 		assert.NoError(t, err)

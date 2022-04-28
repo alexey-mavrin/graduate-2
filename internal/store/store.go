@@ -8,6 +8,7 @@ import (
 	"os"
 	"sync"
 
+	"github.com/alexey-mavrin/graduate-2/internal/common"
 	// sqlite sql package
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -29,24 +30,6 @@ var ErrAlreadyExists = errors.New("Entity already exists")
 type Store struct {
 	db *sql.DB
 }
-
-// User is the client of the secret store service
-type User struct {
-	Name     string `json:"name"`
-	FullName string `json:"full_name"`
-	Password string `json:"password"`
-}
-
-// Account holds account data for some resource
-type Account struct {
-	Name     string `json:"name"`
-	URL      string `json:"url"`
-	UserName string `json:"user_name"`
-	Password string `json:"password"`
-}
-
-// Accounts holds list of accounts indexed by id
-type Accounts map[int64]Account
 
 // CloseDB closes database
 func CloseDB() error {
@@ -168,7 +151,7 @@ func (s *Store) CheckUserAuth(userName string, userPass string) (bool, error) {
 }
 
 // AddUser creates user account
-func (s *Store) AddUser(user User) (int64, error) {
+func (s *Store) AddUser(user common.User) (int64, error) {
 	storeMutex.Lock()
 	defer storeMutex.Unlock()
 
@@ -203,7 +186,7 @@ func (s *Store) AddUser(user User) (int64, error) {
 }
 
 // StoreAccount stores Account data for given user
-func (s *Store) StoreAccount(user string, account Account) (int64, error) {
+func (s *Store) StoreAccount(user string, account common.Account) (int64, error) {
 	storeMutex.Lock()
 	defer storeMutex.Unlock()
 
@@ -228,7 +211,7 @@ func (s *Store) StoreAccount(user string, account Account) (int64, error) {
 }
 
 // UpdateAccount updates an accout record
-func (s *Store) UpdateAccount(user string, id int64, account Account) error {
+func (s *Store) UpdateAccount(user string, id int64, account common.Account) error {
 	storeMutex.Lock()
 	defer storeMutex.Unlock()
 
@@ -262,11 +245,11 @@ func (s *Store) UpdateAccount(user string, id int64, account Account) error {
 
 // GetAccounts returns list of stored accounts for the given user
 // with all but password fileds filled
-func (s *Store) GetAccounts(user string) (Accounts, error) {
+func (s *Store) GetAccounts(user string) (common.Accounts, error) {
 	storeMutex.Lock()
 	defer storeMutex.Unlock()
 
-	accs := make(Accounts)
+	accs := make(common.Accounts)
 	rows, err := secretStore.db.Query(
 		`SELECT accounts.id, accounts.name, accounts.url, accounts.user_name
 			FROM accounts JOIN users ON accounts.user_id = users.id
@@ -279,7 +262,7 @@ func (s *Store) GetAccounts(user string) (Accounts, error) {
 
 	for rows.Next() {
 		var id int64
-		var acc Account
+		var acc common.Account
 		err = rows.Scan(&id, &acc.Name, &acc.URL, &acc.UserName)
 		if err != nil {
 			return accs, err
@@ -290,11 +273,11 @@ func (s *Store) GetAccounts(user string) (Accounts, error) {
 }
 
 // GetAccount returns stored account record including the password
-func (s *Store) GetAccount(user string, id int64) (Account, error) {
+func (s *Store) GetAccount(user string, id int64) (common.Account, error) {
 	storeMutex.Lock()
 	defer storeMutex.Unlock()
 
-	var acc Account
+	var acc common.Account
 
 	row := secretStore.db.QueryRow(
 		`SELECT accounts.name, accounts.url, accounts.user_name, accounts.password

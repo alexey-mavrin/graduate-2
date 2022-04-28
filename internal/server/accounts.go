@@ -8,16 +8,10 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/alexey-mavrin/graduate-2/internal/common"
 	"github.com/alexey-mavrin/graduate-2/internal/store"
 	"github.com/go-chi/chi/v5"
 )
-
-// StoreAccountResponse is the responce for store account
-type StoreAccountResponse struct {
-	Name   string `json:"name"`
-	Status string `json:"status"`
-	ID     int64  `json:"id"`
-}
 
 func listAccounts(w http.ResponseWriter, r *http.Request) {
 	log.Print("listAccounts")
@@ -82,7 +76,7 @@ func getDeleteAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var acc store.Account
+	var acc common.Account
 
 	switch r.Method {
 	case http.MethodGet:
@@ -142,7 +136,7 @@ func storeUpdateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var account store.Account
+	var account common.Account
 	err = json.Unmarshal(body, &account)
 	if err != nil {
 		writeStatus(w,
@@ -161,7 +155,7 @@ func storeUpdateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var resp StoreAccountResponse
+	var resp common.StoreAccountResponse
 	resp.Name = account.Name
 	resp.Status = "OK"
 	switch r.Method {

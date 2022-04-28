@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/alexey-mavrin/graduate-2/internal/common"
 	"github.com/alexey-mavrin/graduate-2/internal/store"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -13,7 +14,7 @@ import (
 
 func Test_createUser(t *testing.T) {
 	type want struct {
-		respData AddUserResponse
+		respData common.AddUserResponse
 		code     int
 	}
 
@@ -30,7 +31,7 @@ func Test_createUser(t *testing.T) {
 			method: http.MethodPost,
 			want: want{
 				code: 200,
-				respData: AddUserResponse{
+				respData: common.AddUserResponse{
 					Name:   "user1",
 					Status: "OK",
 					ID:     1,
@@ -43,7 +44,7 @@ func Test_createUser(t *testing.T) {
 			method: http.MethodPost,
 			want: want{
 				code: http.StatusBadRequest,
-				respData: AddUserResponse{
+				respData: common.AddUserResponse{
 					Name:   "",
 					Status: "User Already Exists",
 					ID:     0,
@@ -70,7 +71,7 @@ func Test_createUser(t *testing.T) {
 			)
 			defer resp.Body.Close()
 			assert.Equal(t, tt.want.code, resp.StatusCode)
-			var respData AddUserResponse
+			var respData common.AddUserResponse
 			err := json.Unmarshal([]byte(body), &respData)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.want.respData, respData)

@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/alexey-mavrin/graduate-2/internal/common"
 	"github.com/alexey-mavrin/graduate-2/internal/store"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -20,7 +21,7 @@ func Test_Account(t *testing.T) {
 	t.Run("Store account record", func(t *testing.T) {
 		createUserBody := `{"name":"user1", "password":"pass"}`
 
-		acc := store.Account{
+		acc := common.Account{
 			Name:     "localhost",
 			URL:      "http://localhost",
 			UserName: "u",
@@ -64,7 +65,7 @@ func Test_Account(t *testing.T) {
 		)
 		defer getResp.Body.Close()
 		assert.Equal(t, http.StatusOK, getResp.StatusCode)
-		var gotAcc store.Account
+		var gotAcc common.Account
 		err := json.Unmarshal([]byte(getRespBody), &gotAcc)
 		assert.NoError(t, err)
 		assert.Equal(t, acc, gotAcc)
@@ -79,7 +80,7 @@ func Test_Account(t *testing.T) {
 			"pass",
 		)
 		assert.Equal(t, http.StatusOK, listResp.StatusCode)
-		var listAccs store.Accounts
+		var listAccs common.Accounts
 		err = json.Unmarshal([]byte(listRespBody), &listAccs)
 		// list returns accounts w/o passwords
 		wantAcc := acc

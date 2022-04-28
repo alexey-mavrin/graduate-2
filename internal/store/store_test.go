@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/alexey-mavrin/graduate-2/internal/common"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
 )
@@ -21,7 +22,7 @@ func dropCreateStore(t *testing.T) *Store {
 func TestStore_StoreAccount(t *testing.T) {
 	type args struct {
 		user    string
-		account Account
+		account common.Account
 	}
 	tests := []struct {
 		name       string
@@ -35,7 +36,7 @@ func TestStore_StoreAccount(t *testing.T) {
 			createUser: false,
 			args: args{
 				user: "user1",
-				account: Account{
+				account: common.Account{
 					URL:      "http://localhost",
 					UserName: "user1",
 					Password: "thePass",
@@ -49,7 +50,7 @@ func TestStore_StoreAccount(t *testing.T) {
 			createUser: true,
 			args: args{
 				user: "user1",
-				account: Account{
+				account: common.Account{
 					URL:      "http://localhost",
 					UserName: "user1",
 					Password: "thePass",
@@ -64,7 +65,7 @@ func TestStore_StoreAccount(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.createUser {
-				_, err := store.AddUser(User{
+				_, err := store.AddUser(common.User{
 					Name: tt.args.user,
 				})
 				assert.NoError(t, err)
@@ -85,13 +86,13 @@ func TestStore_AddUser(t *testing.T) {
 	store := dropCreateStore(t)
 	t.Run("Create user", func(t *testing.T) {
 		user := "user1"
-		_, err := store.AddUser(User{
+		_, err := store.AddUser(common.User{
 			Name: user,
 		})
 		assert.NoError(t, err)
 
 		// attempt to create the same user twice
-		_, err = store.AddUser(User{
+		_, err = store.AddUser(common.User{
 			Name: user,
 		})
 		assert.Error(t, err)
@@ -105,7 +106,7 @@ func TestStore_CheckUserAuth(t *testing.T) {
 		wrongUser := "user2"
 		pass := "pass1"
 		wrongPass := "pass2"
-		_, err := store.AddUser(User{
+		_, err := store.AddUser(common.User{
 			Name:     user,
 			Password: pass,
 		})
@@ -129,14 +130,14 @@ func TestStore_GetAccount(t *testing.T) {
 	t.Run("Get single account", func(t *testing.T) {
 		user := "user1"
 
-		acc := Account{
+		acc := common.Account{
 			Name:     "local host",
 			URL:      "http://localhost",
 			UserName: user,
 			Password: "secret1000",
 		}
 
-		_, err := store.AddUser(User{
+		_, err := store.AddUser(common.User{
 			Name: user,
 		})
 		assert.NoError(t, err)
@@ -160,19 +161,19 @@ func TestStore_GetAccounts(t *testing.T) {
 		url1 := "http://localhost"
 		url2 := "http://localhost:8080"
 
-		_, err := store.AddUser(User{
+		_, err := store.AddUser(common.User{
 			Name: user,
 		})
 		assert.NoError(t, err)
 
-		id1, err := store.StoreAccount(user, Account{
+		id1, err := store.StoreAccount(user, common.Account{
 			UserName: user,
 			Name:     name1,
 			URL:      url1,
 		})
 		assert.NoError(t, err)
 
-		id2, err := store.StoreAccount(user, Account{
+		id2, err := store.StoreAccount(user, common.Account{
 			UserName: user,
 			Name:     name2,
 			URL:      url2,
@@ -182,13 +183,13 @@ func TestStore_GetAccounts(t *testing.T) {
 		accs, err := store.GetAccounts(user)
 		assert.NoError(t, err)
 
-		wantAccs := make(Accounts)
-		wantAccs[id1] = Account{
+		wantAccs := make(common.Accounts)
+		wantAccs[id1] = common.Account{
 			UserName: user,
 			Name:     name1,
 			URL:      url1,
 		}
-		wantAccs[id2] = Account{
+		wantAccs[id2] = common.Account{
 			UserName: user,
 			Name:     name2,
 			URL:      url2,
@@ -203,14 +204,14 @@ func TestStore_DeleteAccount(t *testing.T) {
 	t.Run("Delete account record", func(t *testing.T) {
 		user := "user1"
 
-		acc := Account{
+		acc := common.Account{
 			URL:      "http://localhost",
 			Name:     "local host",
 			UserName: user,
 			Password: "secret1000",
 		}
 
-		_, err := store.AddUser(User{
+		_, err := store.AddUser(common.User{
 			Name: user,
 		})
 		assert.NoError(t, err)
@@ -239,19 +240,19 @@ func TestStore_UpdateAccount(t *testing.T) {
 		url1 := "http://localhost"
 		url2 := "http://localhost:8080"
 
-		_, err := store.AddUser(User{
+		_, err := store.AddUser(common.User{
 			Name: user,
 		})
 		assert.NoError(t, err)
 
-		id, err := store.StoreAccount(user, Account{
+		id, err := store.StoreAccount(user, common.Account{
 			URL:      url1,
 			Name:     name,
 			UserName: user,
 		})
 		assert.NoError(t, err)
 
-		err = store.UpdateAccount(user, id, Account{
+		err = store.UpdateAccount(user, id, common.Account{
 			URL:      url2,
 			UserName: user,
 		})

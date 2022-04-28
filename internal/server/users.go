@@ -8,15 +8,9 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/alexey-mavrin/graduate-2/internal/common"
 	"github.com/alexey-mavrin/graduate-2/internal/store"
 )
-
-// AddUserResponse is the responce for AddUser request
-type AddUserResponse struct {
-	Name   string `json:"name"`
-	Status string `json:"status"`
-	ID     int64  `json:"id"`
-}
 
 func createUser(w http.ResponseWriter, r *http.Request) {
 	log.Print("createUser")
@@ -31,7 +25,7 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var user store.User
+	var user common.User
 	err = json.Unmarshal(body, &user)
 	if err != nil {
 		writeStatus(w,
@@ -50,7 +44,7 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 		)
 		return
 	}
-	var resp AddUserResponse
+	var resp common.AddUserResponse
 	resp.Name = user.Name
 	resp.Status = "OK"
 	resp.ID, err = s.AddUser(user)

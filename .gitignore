@@ -6,6 +6,7 @@
 *.dylib
 *.swp
 secret_storage.db
+server_storage.db
 
 # Test binary, built with `go test -c`
 *.test

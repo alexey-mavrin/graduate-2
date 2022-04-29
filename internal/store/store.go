@@ -14,8 +14,11 @@ import (
 )
 
 const (
-	dbFile = "secret_storage.db"
+	defaultDBFile = "secret_storage.db"
 )
+
+// DBFile is the global db file name
+var DBFile = defaultDBFile
 
 var secretStore *Store
 var storeMutex sync.Mutex
@@ -50,7 +53,7 @@ func DropStore() error {
 		return err
 	}
 
-	err = os.Remove(dbFile)
+	err = os.Remove(DBFile)
 	if os.IsNotExist(err) {
 		return nil
 	}
@@ -69,7 +72,7 @@ func NewStore() (*Store, error) {
 	secretStore = &Store{}
 	var err error
 
-	secretStore.db, err = sql.Open("sqlite3", dbFile)
+	secretStore.db, err = sql.Open("sqlite3", DBFile)
 	if err != nil {
 		return secretStore, err
 	}

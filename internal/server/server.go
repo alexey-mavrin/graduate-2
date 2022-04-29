@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -12,8 +13,8 @@ import (
 )
 
 const (
-	// ListenAddress  is the address the server listen to
-	ListenAddress = ":8080"
+	defaultListenAddress = ":8080"
+	defaultStoreFile     = "server_store.db"
 	// registerPath is the path to serve requests to register new users
 	registerPath = "/users"
 )
@@ -38,12 +39,22 @@ func checkSetContentType(next http.Handler) http.Handler {
 }
 
 // StartServer starts the server
-func StartServer() error {
+func StartServer(listenPort int, storeFile string) error {
+	store.DBFile = storeFile
+	if storeFile == "" {
+		store.DBFile = defaultStoreFile
+	}
+
+	listenAddress := fmt.Sprintf(":%d", listenPort)
+	if listenPort == 0 {
+		listenAddress = defaultListenAddress
+	}
+
 	r := NewRouter()
 	c := make(chan error)
 	go func() {
-		log.Printf("Listening on %v...", ListenAddress)
-		err := http.ListenAndServe(ListenAddress, r)
+		log.Printf("Listening on %v...", listenAddress)
+		err := http.ListenAndServe(listenAddress, r)
 		c <- err
 	}()
 

@@ -109,6 +109,6 @@ func Test_Account(t *testing.T) {
 			"pass",
 		)
 		defer getResp.Body.Close()
-		assert.Equal(t, http.StatusBadRequest, getResp2.StatusCode)
+		assert.Equal(t, http.StatusNotFound, getResp2.StatusCode)
 	})
 }

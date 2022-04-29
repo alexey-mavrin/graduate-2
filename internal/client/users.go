@@ -5,11 +5,35 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 
 	"github.com/alexey-mavrin/graduate-2/internal/common"
 )
+
+// VerifyUser attempts to authenticate current user
+func (c Client) VerifyUser() error {
+	req, err := c.prepaReq(http.MethodGet, "/ping", nil)
+	if err != nil {
+		return err
+	}
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		err = fmt.Errorf(
+			"verify user: http status %d",
+			resp.StatusCode,
+		)
+		return err
+	}
+
+	return nil
+}
 
 // RegisterUser attempts to register current user into the system
 // returns new user id and error
@@ -43,14 +67,6 @@ func (c Client) RegisterUser(fullName string) (int64, error) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("registing %s, http status %d",
-			c.UserName,
-			resp.StatusCode,
-		)
-		return 0, fmt.Errorf("http error %d", resp.StatusCode)
-	}
-
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return 0, err
@@ -60,6 +76,13 @@ func (c Client) RegisterUser(fullName string) (int64, error) {
 	err = json.Unmarshal(respBody, &addUserResp)
 	if err != nil {
 		return 0, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return 0, fmt.Errorf("http error %d, %s",
+			resp.StatusCode,
+			addUserResp.Status,
+		)
 	}
 
 	return addUserResp.ID, nil

@@ -2,7 +2,6 @@ package client
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -59,14 +58,6 @@ func (c *Client) DeleteAccount(id int64) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		err = fmt.Errorf(
-			"delete account: http status %d",
-			resp.StatusCode,
-		)
-		return err
-	}
-
 	var status common.StoreAccountResponse
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -76,9 +67,16 @@ func (c *Client) DeleteAccount(id int64) error {
 	if err != nil {
 		return err
 	}
-	if status.Status != "OK" {
-		return errors.New(status.Status)
+
+	if resp.StatusCode != http.StatusOK {
+		err = fmt.Errorf(
+			"delete account: http status %d: %s",
+			resp.StatusCode,
+			status.Status,
+		)
+		return err
 	}
+
 	return nil
 }
 
@@ -138,14 +136,6 @@ func (c *Client) UpdateAccount(id int64, acc common.Account) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		err = fmt.Errorf(
-			"updating account: http status %d",
-			resp.StatusCode,
-		)
-		return err
-	}
-
 	var status common.StoreAccountResponse
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -155,9 +145,15 @@ func (c *Client) UpdateAccount(id int64, acc common.Account) error {
 	if err != nil {
 		return err
 	}
-	if status.Status != "OK" {
-		return errors.New(status.Status)
+	if resp.StatusCode != http.StatusOK {
+		err = fmt.Errorf(
+			"updating account: http status %d: %s",
+			resp.StatusCode,
+			status.Status,
+		)
+		return err
 	}
+
 	return nil
 }
 
@@ -180,14 +176,6 @@ func (c *Client) StoreAccount(acc common.Account) (int64, error) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		err = fmt.Errorf(
-			"storing account: http status %d",
-			resp.StatusCode,
-		)
-		return 0, err
-	}
-
 	var status common.StoreAccountResponse
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -197,8 +185,15 @@ func (c *Client) StoreAccount(acc common.Account) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	if status.Status != "OK" {
-		return 0, errors.New(status.Status)
+
+	if resp.StatusCode != http.StatusOK {
+		err = fmt.Errorf(
+			"storing account: http status %d: %s",
+			resp.StatusCode,
+			status.Status,
+		)
+		return 0, err
 	}
+
 	return status.ID, nil
 }

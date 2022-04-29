@@ -87,7 +87,7 @@ func getDeleteAccount(w http.ResponseWriter, r *http.Request) {
 	if err == store.ErrNotFound {
 		log.Print("Account not found")
 		writeStatus(w,
-			http.StatusBadRequest,
+			http.StatusNotFound,
 			"Account not found",
 		)
 		return

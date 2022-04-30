@@ -27,7 +27,7 @@ func actUser(subop config.OpSubtype, user common.User) error {
 		if err != nil {
 			return err
 		}
-		log.Printf("user is verifyed")
+		log.Printf("user is verified")
 	}
 	return nil
 }

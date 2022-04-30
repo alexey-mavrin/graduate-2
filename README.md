@@ -64,7 +64,7 @@
 1. Проверить регистарцию:
    ```
    $ go run cmd/client/main.go user -a verify
-   2022/04/30 09:18:11 user is verifyed
+   2022/04/30 09:18:11 user is verified
    ```
 1. Сохранить данные аккаунтов:
    ```

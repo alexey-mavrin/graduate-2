@@ -64,6 +64,7 @@ func ParseFlags() error {
 	accUserName := accFlags.String("u", "", "account user name")
 	accPassword := accFlags.String("p", "", "account password")
 	accURL := accFlags.String("l", "", "account URL")
+	accMeta := accFlags.String("m", "", "account Metainfo")
 	accID := accFlags.Int64("i", 0, "account ID")
 
 	if len(os.Args) < 2 {
@@ -108,6 +109,7 @@ func ParseFlags() error {
 		Op.Account.UserName = *accUserName
 		Op.Account.Password = *accPassword
 		Op.Account.URL = *accURL
+		Op.Account.Meta = *accMeta
 		Op.AccountID = *accID
 	}
 

@@ -98,6 +98,7 @@ func NewStore() (*Store, error) {
 		url TEXT,
 		user_name TEXT,
 		password TEXT,
+		meta TEXT,
 		FOREIGN KEY (user_id)
 		  REFERENCES users (id)
 		    ON DELETE CASCADE
@@ -194,13 +195,14 @@ func (s *Store) StoreAccount(user string, account common.Account) (int64, error)
 	defer storeMutex.Unlock()
 
 	res, err := secretStore.db.Exec(`INSERT INTO accounts
-		(user_id, name, url, user_name, password)
-		VALUES((SELECT id from users where user=?), ?, ?, ?, ?)`,
+		(user_id, name, url, user_name, password, meta)
+		VALUES((SELECT id from users where user=?), ?, ?, ?, ?, ?)`,
 		user,
 		account.Name,
 		account.URL,
 		account.UserName,
 		account.Password,
+		account.Meta,
 	)
 	if err != nil {
 		return 0, err
@@ -219,7 +221,7 @@ func (s *Store) UpdateAccount(user string, id int64, account common.Account) err
 	defer storeMutex.Unlock()
 
 	res, err := secretStore.db.Exec(`UPDATE accounts
-		SET name = ?, url = ?, user_name = ?, password = ?
+		SET name = ?, url = ?, user_name = ?, password = ?, meta = ?
 		WHERE id in
 		( SELECT accounts.id FROM accounts
 			JOIN users ON accounts.user_id = users.id
@@ -228,6 +230,7 @@ func (s *Store) UpdateAccount(user string, id int64, account common.Account) err
 		account.URL,
 		account.UserName,
 		account.Password,
+		account.Meta,
 		user,
 		id,
 	)
@@ -254,7 +257,8 @@ func (s *Store) GetAccounts(user string) (common.Accounts, error) {
 
 	accs := make(common.Accounts)
 	rows, err := secretStore.db.Query(
-		`SELECT accounts.id, accounts.name, accounts.url, accounts.user_name
+		`SELECT accounts.id, accounts.name, accounts.url,
+			accounts.user_name, accounts.meta
 			FROM accounts JOIN users ON accounts.user_id = users.id
 			WHERE users.user = ?`,
 		user,
@@ -266,7 +270,7 @@ func (s *Store) GetAccounts(user string) (common.Accounts, error) {
 	for rows.Next() {
 		var id int64
 		var acc common.Account
-		err = rows.Scan(&id, &acc.Name, &acc.URL, &acc.UserName)
+		err = rows.Scan(&id, &acc.Name, &acc.URL, &acc.UserName, &acc.Meta)
 		if err != nil {
 			return accs, err
 		}
@@ -283,13 +287,19 @@ func (s *Store) GetAccount(user string, id int64) (common.Account, error) {
 	var acc common.Account
 
 	row := secretStore.db.QueryRow(
-		`SELECT accounts.name, accounts.url, accounts.user_name, accounts.password
+		`SELECT accounts.name, accounts.url, accounts.user_name,
+			accounts.password, accounts.meta
 			FROM accounts JOIN users ON accounts.user_id = users.id
 			WHERE users.user = ? AND accounts.id = ?`,
 		user, id,
 	)
 
-	err := row.Scan(&acc.Name, &acc.URL, &acc.UserName, &acc.Password)
+	err := row.Scan(&acc.Name,
+		&acc.URL,
+		&acc.UserName,
+		&acc.Password,
+		&acc.Meta,
+	)
 	if err == sql.ErrNoRows {
 		return acc, ErrNotFound
 	}

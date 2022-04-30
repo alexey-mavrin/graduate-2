@@ -13,6 +13,7 @@ type Account struct {
 	URL      string `json:"url"`
 	UserName string `json:"user_name"`
 	Password string `json:"password"`
+	Meta     string `json:"meta"`
 }
 
 // Accounts holds list of accounts indexed by id

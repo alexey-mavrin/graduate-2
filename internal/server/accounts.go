@@ -32,7 +32,7 @@ func listAccounts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accs, err := s.GetAccounts(user)
+	accs, err := s.ListAccounts(user)
 	if err != nil {
 		log.Print(err)
 		writeStatus(w,

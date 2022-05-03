@@ -11,6 +11,7 @@ type Config struct {
 	Password   string `json:"password"`
 	FullName   string `json:"full_name"`
 	ServerAddr string `json:"server_address"`
+	CacheFile  string `json:"cache_file"`
 }
 
 // Cfg holds global parameters from config file

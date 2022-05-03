@@ -14,6 +14,7 @@ func actUser(subop config.OpSubtype, user common.User) error {
 	clnt := client.NewClient(config.Cfg.ServerAddr,
 		config.Cfg.UserName,
 		config.Cfg.Password,
+		config.Cfg.CacheFile,
 	)
 	switch subop {
 	case config.OpSubtypeUserRegister:
@@ -36,6 +37,7 @@ func actAccount(subop config.OpSubtype, acc common.Account) error {
 	clnt := client.NewClient(config.Cfg.ServerAddr,
 		config.Cfg.UserName,
 		config.Cfg.Password,
+		config.Cfg.CacheFile,
 	)
 	switch subop {
 	case config.OpSubtypeAccountStore:

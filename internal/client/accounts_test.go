@@ -1,6 +1,7 @@
 package client
 
 import (
+	"os"
 	"testing"
 
 	"github.com/alexey-mavrin/graduate-2/internal/common"
@@ -18,7 +19,7 @@ func Test_accounts(t *testing.T) {
 	url := "http://localhost"
 	url1 := "http://localhost:8080"
 
-	clnt := NewClient(ts.URL, userName, userPass)
+	clnt := NewClient(ts.URL, userName, userPass, "")
 
 	_, err = clnt.RegisterUser("")
 	assert.NoError(t, err)
@@ -54,5 +55,131 @@ func Test_accounts(t *testing.T) {
 	assert.NoError(t, err)
 
 	gotAcc, err = clnt.GetAccount(id)
+	assert.Error(t, err)
+}
+
+func Test_accountsCache(t *testing.T) {
+	ts, err := newHTTPServer()
+	require.NoError(t, err)
+	defer ts.Close()
+
+	userName := "user1"
+	userPass := "pass"
+	url := "http://localhost"
+
+	cacheName := "cache_storage.db"
+	err = os.Remove(cacheName)
+	if err != nil && !os.IsNotExist(err) {
+		t.Fatal(err)
+	}
+
+	clnt := NewClient(ts.URL, userName, userPass, cacheName)
+
+	_, err = clnt.RegisterUser("")
+	assert.NoError(t, err)
+
+	acc := common.Account{
+		Name:     "local host",
+		UserName: "u",
+		Password: "p",
+		URL:      url,
+	}
+
+	id, err := clnt.StoreAccount(acc)
+	assert.NoError(t, err)
+
+	ts.Close()
+
+	// should get account from cache
+	gotAcc, err := clnt.GetAccount(id)
+	assert.NoError(t, err)
+	assert.Equal(t, gotAcc, acc)
+}
+
+func Test_accountsUpdateCache(t *testing.T) {
+	ts, err := newHTTPServer()
+	require.NoError(t, err)
+	defer ts.Close()
+
+	userName := "user1"
+	userPass := "pass"
+	url := "http://localhost"
+
+	cacheName := "cache_storage.db"
+	err = os.Remove(cacheName)
+	if err != nil && !os.IsNotExist(err) {
+		t.Fatal(err)
+	}
+
+	clnt := NewClient(ts.URL, userName, userPass, cacheName)
+
+	_, err = clnt.RegisterUser("")
+	assert.NoError(t, err)
+
+	acc := common.Account{
+		Name:     "local host",
+		UserName: "u",
+		Password: "p",
+		URL:      url,
+	}
+
+	accUpd := common.Account{
+		Name:     "local host",
+		UserName: "u",
+		Password: "pNew",
+		URL:      url,
+	}
+
+	id, err := clnt.StoreAccount(acc)
+	assert.NoError(t, err)
+
+	err = clnt.UpdateAccount(id, accUpd)
+	assert.NoError(t, err)
+
+	ts.Close()
+
+	// should get account from cache
+	gotAcc, err := clnt.GetAccount(id)
+	assert.NoError(t, err)
+	assert.Equal(t, accUpd, gotAcc)
+}
+
+func Test_accountsDeleteCache(t *testing.T) {
+	ts, err := newHTTPServer()
+	require.NoError(t, err)
+	defer ts.Close()
+
+	userName := "user1"
+	userPass := "pass"
+	url := "http://localhost"
+
+	cacheName := "cache_storage.db"
+	err = os.Remove(cacheName)
+	if err != nil && !os.IsNotExist(err) {
+		t.Fatal(err)
+	}
+
+	clnt := NewClient(ts.URL, userName, userPass, cacheName)
+
+	_, err = clnt.RegisterUser("")
+	assert.NoError(t, err)
+
+	acc := common.Account{
+		Name:     "local host",
+		UserName: "u",
+		Password: "p",
+		URL:      url,
+	}
+
+	id, err := clnt.StoreAccount(acc)
+	assert.NoError(t, err)
+
+	err = clnt.DeleteAccount(id)
+	assert.NoError(t, err)
+
+	ts.Close()
+
+	// should NOT get account from cache
+	_, err = clnt.GetAccount(id)
 	assert.Error(t, err)
 }

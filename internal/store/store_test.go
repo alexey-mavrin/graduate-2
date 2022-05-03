@@ -152,7 +152,7 @@ func TestStore_GetAccount(t *testing.T) {
 	})
 }
 
-func TestStore_GetAccounts(t *testing.T) {
+func TestStore_ListAccounts(t *testing.T) {
 	store := dropCreateStore(t)
 	t.Run("Get multiple accounts", func(t *testing.T) {
 		user := "user1"
@@ -180,7 +180,7 @@ func TestStore_GetAccounts(t *testing.T) {
 		})
 		assert.NoError(t, err)
 
-		accs, err := store.GetAccounts(user)
+		accs, err := store.ListAccounts(user)
 		assert.NoError(t, err)
 
 		wantAccs := make(common.Accounts)

@@ -61,6 +61,7 @@ TODO:
      "password": "pass",
      "full_name": "Full Name",
      "server_address": "http://localhost:8088"
+     "cache_file": "cache_store.db"
    }
    ```
 1. Запустить сервер

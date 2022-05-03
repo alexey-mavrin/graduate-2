@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 
 	"github.com/alexey-mavrin/graduate-2/internal/common"
@@ -17,7 +18,9 @@ func (c *Client) ListAccounts() (common.Accounts, error) {
 		return accs, err
 	}
 
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: c.Timeout,
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return accs, err
@@ -51,7 +54,9 @@ func (c *Client) DeleteAccount(id int64) error {
 		return err
 	}
 
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: c.Timeout,
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
@@ -90,10 +95,13 @@ func (c *Client) GetAccount(id int64) (common.Account, error) {
 		return acc, err
 	}
 
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: c.Timeout,
+	}
 	resp, err := client.Do(req)
 	if err != nil {
-		return acc, err
+		log.Printf("cannot contact the server: %v, trying local cache", err)
+		return c.cacheGetAccount(id)
 	}
 	defer resp.Body.Close()
 
@@ -113,6 +121,12 @@ func (c *Client) GetAccount(id int64) (common.Account, error) {
 	if err != nil {
 		return acc, err
 	}
+
+	err = c.cacheAccount(id, acc)
+	if err != nil {
+		log.Printf("cache account: %v", err)
+	}
+
 	return acc, nil
 }
 
@@ -129,7 +143,9 @@ func (c *Client) UpdateAccount(id int64, acc common.Account) error {
 		return err
 	}
 
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: c.Timeout,
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
@@ -154,6 +170,11 @@ func (c *Client) UpdateAccount(id int64, acc common.Account) error {
 		return err
 	}
 
+	err = c.cacheAccount(id, acc)
+	if err != nil {
+		log.Printf("cache account: %v", err)
+	}
+
 	return nil
 }
 
@@ -169,7 +190,9 @@ func (c *Client) StoreAccount(acc common.Account) (int64, error) {
 		return 0, err
 	}
 
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: c.Timeout,
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return 0, err
@@ -193,6 +216,11 @@ func (c *Client) StoreAccount(acc common.Account) (int64, error) {
 			status.Status,
 		)
 		return 0, err
+	}
+
+	err = c.cacheAccount(status.ID, acc)
+	if err != nil {
+		log.Printf("cache account: %v", err)
 	}
 
 	return status.ID, nil

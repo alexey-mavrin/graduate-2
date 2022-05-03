@@ -57,7 +57,7 @@ func Test_createUser(t *testing.T) {
 	defer ts.Close()
 
 	for _, tt := range tests {
-		clnt := NewClient(ts.URL, tt.userName, tt.userPass)
+		clnt := NewClient(ts.URL, tt.userName, tt.userPass, "")
 		t.Run(tt.name, func(t *testing.T) {
 			id, err := clnt.RegisterUser("")
 			tt.wantErrRegister(t, err)

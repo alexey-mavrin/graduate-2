@@ -3,6 +3,13 @@ package client
 import (
 	"bytes"
 	"net/http"
+	"time"
+
+	"github.com/alexey-mavrin/graduate-2/internal/store"
+)
+
+const (
+	defaultClientTimeout = time.Second * 1
 )
 
 // Client describes general client configuration
@@ -10,14 +17,23 @@ type Client struct {
 	ServerAddr string
 	UserName   string
 	UserPass   string
+	CacheFile  string
+	Timeout    time.Duration
 }
 
 // NewClient returns new client
-func NewClient(serverAddr string, userName string, userPass string) *Client {
+func NewClient(serverAddr string,
+	userName string,
+	userPass string,
+	cacheFile string,
+) *Client {
+	store.DBFile = cacheFile
 	return &Client{
 		ServerAddr: serverAddr,
 		UserName:   userName,
 		UserPass:   userPass,
+		CacheFile:  cacheFile,
+		Timeout:    defaultClientTimeout,
 	}
 }
 

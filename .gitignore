@@ -5,8 +5,9 @@
 *.so
 *.dylib
 *.swp
-secret_storage.db
-server_storage.db
+
+# sqlite databases
+*.db
 
 # Test binary, built with `go test -c`
 *.test

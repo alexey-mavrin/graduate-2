@@ -189,6 +189,29 @@ func (s *Store) AddUser(user common.User) (int64, error) {
 	return id, nil
 }
 
+// StoreAccountID stores account with the ID specified
+func (s *Store) StoreAccountID(id int64, user string, account common.Account) error {
+	storeMutex.Lock()
+	defer storeMutex.Unlock()
+
+	_, err := secretStore.db.Exec(`INSERT INTO accounts
+		(id, user_id, name, url, user_name, password, meta)
+		VALUES(?, (SELECT id from users where user=?), ?, ?, ?, ?, ?)`,
+		id,
+		user,
+		account.Name,
+		account.URL,
+		account.UserName,
+		account.Password,
+		account.Meta,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // StoreAccount stores Account data for given user
 func (s *Store) StoreAccount(user string, account common.Account) (int64, error) {
 	storeMutex.Lock()
@@ -249,9 +272,9 @@ func (s *Store) UpdateAccount(user string, id int64, account common.Account) err
 	return nil
 }
 
-// GetAccounts returns list of stored accounts for the given user
+// ListAccounts returns list of stored accounts for the given user
 // with all but password fileds filled
-func (s *Store) GetAccounts(user string) (common.Accounts, error) {
+func (s *Store) ListAccounts(user string) (common.Accounts, error) {
 	storeMutex.Lock()
 	defer storeMutex.Unlock()
 

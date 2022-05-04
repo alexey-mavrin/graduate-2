@@ -23,6 +23,20 @@ type Note struct {
 	Meta string `json:"meta"`
 }
 
+// Record can hold any record that could be stored
+type Record struct {
+	Type    RecordType
+	Account *Account
+	Note    *Note
+}
+
+// Records can hold the map of any record that could be stored
+type Records struct {
+	Type     RecordType
+	Accounts *Accounts
+	Notes    *Notes
+}
+
 // RecordType is the type of record conveyed
 type RecordType string
 

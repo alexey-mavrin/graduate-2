@@ -237,7 +237,7 @@ func (c *Client) updateRecord(id int64, record common.Record) error {
 	}
 
 	if cacheErr != nil {
-		log.Printf("cache account: %v", err)
+		log.Printf("cache %s: %v", record.Type, cacheErr)
 	}
 
 	return nil
@@ -304,7 +304,7 @@ func (c *Client) storeRecord(record common.Record) (int64, error) {
 	}
 
 	if cacheErr != nil {
-		log.Printf("cache account: %v", err)
+		log.Printf("cache %s: %v", record.Type, cacheErr)
 	}
 
 	return status.ID, nil

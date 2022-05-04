@@ -16,16 +16,28 @@ type Account struct {
 	Meta     string `json:"meta"`
 }
 
+// Note holds text data
+type Note struct {
+	Name string `json:"name"`
+	Text string `json:"text"`
+	Meta string `json:"meta"`
+}
+
 // RecordType is the type of record conveyed
 type RecordType string
 
 const (
 	// AccountRecord is the Account record type
 	AccountRecord RecordType = "account"
+	// NoteRecord is the Note record type
+	NoteRecord RecordType = "note"
 )
 
 // Accounts holds list of accounts indexed by id
 type Accounts map[int64]Account
+
+// Notes holds list of notes indexed by id
+type Notes map[int64]Note
 
 // AddUserResponse is the response for AddUser request
 type AddUserResponse struct {

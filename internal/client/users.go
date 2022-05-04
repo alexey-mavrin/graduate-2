@@ -72,7 +72,7 @@ func (c Client) RegisterUser(fullName string) (int64, error) {
 		return 0, err
 	}
 
-	var addUserResp common.StoreAccountResponse
+	var addUserResp common.StoreRecordResponse
 	err = json.Unmarshal(respBody, &addUserResp)
 	if err != nil {
 		return 0, err

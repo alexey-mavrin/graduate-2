@@ -13,7 +13,7 @@ import (
 // ListAccounts lists account for the current user
 func (c *Client) ListAccounts() (common.Accounts, error) {
 	var accs common.Accounts
-	req, err := c.prepaReq(http.MethodGet, "/accounts", nil)
+	req, err := c.prepaReq(http.MethodGet, "/records/account", nil)
 	if err != nil {
 		return accs, err
 	}
@@ -48,7 +48,7 @@ func (c *Client) ListAccounts() (common.Accounts, error) {
 
 // DeleteAccount returns account record with the given id
 func (c *Client) DeleteAccount(id int64) error {
-	path := fmt.Sprintf("/accounts/%d", id)
+	path := fmt.Sprintf("/records/account/%d", id)
 	req, err := c.prepaReq(http.MethodDelete, path, nil)
 	if err != nil {
 		return err
@@ -63,7 +63,7 @@ func (c *Client) DeleteAccount(id int64) error {
 	}
 	defer resp.Body.Close()
 
-	var status common.StoreAccountResponse
+	var status common.StoreRecordResponse
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
@@ -89,7 +89,7 @@ func (c *Client) DeleteAccount(id int64) error {
 func (c *Client) GetAccount(id int64) (common.Account, error) {
 	var acc common.Account
 
-	path := fmt.Sprintf("/accounts/%d", id)
+	path := fmt.Sprintf("/records/account/%d", id)
 	req, err := c.prepaReq(http.MethodGet, path, nil)
 	if err != nil {
 		return acc, err
@@ -137,7 +137,7 @@ func (c *Client) UpdateAccount(id int64, acc common.Account) error {
 		return err
 	}
 
-	path := fmt.Sprintf("/accounts/%d", id)
+	path := fmt.Sprintf("/records/account/%d", id)
 	req, err := c.prepaReq(http.MethodPut, path, body)
 	if err != nil {
 		return err
@@ -152,7 +152,7 @@ func (c *Client) UpdateAccount(id int64, acc common.Account) error {
 	}
 	defer resp.Body.Close()
 
-	var status common.StoreAccountResponse
+	var status common.StoreRecordResponse
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
@@ -185,7 +185,7 @@ func (c *Client) StoreAccount(acc common.Account) (int64, error) {
 		return 0, err
 	}
 
-	req, err := c.prepaReq(http.MethodPost, "/accounts", body)
+	req, err := c.prepaReq(http.MethodPost, "/records/account", body)
 	if err != nil {
 		return 0, err
 	}
@@ -199,7 +199,7 @@ func (c *Client) StoreAccount(acc common.Account) (int64, error) {
 	}
 	defer resp.Body.Close()
 
-	var status common.StoreAccountResponse
+	var status common.StoreRecordResponse
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return 0, err

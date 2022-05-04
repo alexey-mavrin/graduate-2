@@ -16,6 +16,14 @@ type Account struct {
 	Meta     string `json:"meta"`
 }
 
+// RecordType is the type of record conveyed
+type RecordType string
+
+const (
+	// AccountRecord is the Account record type
+	AccountRecord RecordType = "account"
+)
+
 // Accounts holds list of accounts indexed by id
 type Accounts map[int64]Account
 
@@ -26,8 +34,8 @@ type AddUserResponse struct {
 	ID     int64  `json:"id"`
 }
 
-// StoreAccountResponse is the responce for store account
-type StoreAccountResponse struct {
+// StoreRecordResponse is the responce for store account
+type StoreRecordResponse struct {
 	Name   string `json:"name"`
 	Status string `json:"status"`
 	ID     int64  `json:"id"`

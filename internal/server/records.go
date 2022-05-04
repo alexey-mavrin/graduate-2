@@ -14,23 +14,63 @@ import (
 )
 
 func listRecords(w http.ResponseWriter, r *http.Request) {
-	log.Print("listRecords")
 	recordType := common.RecordType(chi.URLParam(r, "record_type"))
+	log.Print("listRecords " + recordType)
 
-	switch recordType {
-	case common.AccountRecord:
-		listAccounts(w, r)
+	user, _, ok := r.BasicAuth()
+	if !ok {
+		writeStatus(w, http.StatusBadRequest, "no basic auth")
 		return
-	default:
-		msg := "unknown record type requested"
-		log.Print(msg)
+	}
+
+	s, err := store.NewStore()
+	if err != nil {
+		log.Print(err)
 		writeStatus(w,
-			http.StatusBadRequest,
-			msg,
+			http.StatusInternalServerError,
+			"Internal Server Error",
 		)
 		return
 	}
 
+	var listErr, encodeErr error
+	switch recordType {
+	case common.AccountRecord:
+		var accs common.Accounts
+		accs, listErr = s.ListAccounts(user)
+		if listErr != nil {
+			break
+		}
+		encodeErr = json.NewEncoder(w).Encode(accs)
+	case common.NoteRecord:
+		var notes common.Notes
+		notes, listErr = s.ListNotes(user)
+		if listErr != nil {
+			break
+		}
+		encodeErr = json.NewEncoder(w).Encode(notes)
+	default:
+		msg := "unknown record type requested"
+		log.Print(msg)
+		writeStatus(w, http.StatusBadRequest, msg)
+		return
+	}
+	if listErr != nil {
+		log.Print(listErr)
+		writeStatus(w,
+			http.StatusInternalServerError,
+			"Internal Server Error",
+		)
+		return
+	}
+	if encodeErr != nil {
+		log.Print(encodeErr)
+		writeStatus(w,
+			http.StatusInternalServerError,
+			"Internal Server Error",
+		)
+		return
+	}
 }
 
 func getRecord(w http.ResponseWriter, r *http.Request) {
@@ -68,6 +108,13 @@ func getRecord(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		encodeErr = json.NewEncoder(w).Encode(acc)
+	case common.NoteRecord:
+		var note common.Note
+		note, getErr = s.GetNote(user, int64(id))
+		if getErr != nil {
+			break
+		}
+		encodeErr = json.NewEncoder(w).Encode(note)
 	default:
 		msg := "unknown record type requested"
 		log.Print(msg)
@@ -102,7 +149,8 @@ func getRecord(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteRecord(w http.ResponseWriter, r *http.Request) {
-	log.Print("deleteRecords")
+	recordType := common.RecordType(chi.URLParam(r, "record_type"))
+	log.Print("deleteRecords " + recordType)
 
 	user, _, ok := r.BasicAuth()
 	if !ok {
@@ -110,7 +158,6 @@ func deleteRecord(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	recordType := common.RecordType(chi.URLParam(r, "record_type"))
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		writeStatus(w, http.StatusBadRequest, "cannot parse 'id' param")
@@ -131,6 +178,8 @@ func deleteRecord(w http.ResponseWriter, r *http.Request) {
 	switch recordType {
 	case common.AccountRecord:
 		deleteErr = s.DeleteAccount(user, int64(id))
+	case common.NoteRecord:
+		deleteErr = s.DeleteNote(user, int64(id))
 	default:
 		msg := "unknown record type requested"
 		log.Print(msg)
@@ -159,15 +208,14 @@ func deleteRecord(w http.ResponseWriter, r *http.Request) {
 }
 
 func storeRecord(w http.ResponseWriter, r *http.Request) {
-	log.Print("storeRecord")
+	recordType := common.RecordType(chi.URLParam(r, "record_type"))
+	log.Print("storeRecord " + recordType)
 
 	user, _, ok := r.BasicAuth()
 	if !ok {
 		writeStatus(w, http.StatusBadRequest, "no basic auth")
 		return
 	}
-
-	recordType := common.RecordType(chi.URLParam(r, "record_type"))
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -195,7 +243,6 @@ func storeRecord(w http.ResponseWriter, r *http.Request) {
 	switch recordType {
 	case common.AccountRecord:
 		var account common.Account
-		resp.Name = account.Name
 		err = json.Unmarshal(body, &account)
 		if err != nil {
 			writeStatus(w,
@@ -204,7 +251,20 @@ func storeRecord(w http.ResponseWriter, r *http.Request) {
 			)
 			return
 		}
+		resp.Name = account.Name
 		resp.ID, storeErr = s.StoreAccount(user, account)
+	case common.NoteRecord:
+		var note common.Note
+		err = json.Unmarshal(body, &note)
+		if err != nil {
+			writeStatus(w,
+				http.StatusBadRequest,
+				fmt.Sprintf("Cannot Parse Body: %v", err),
+			)
+			return
+		}
+		resp.Name = note.Name
+		resp.ID, storeErr = s.StoreNote(user, note)
 	default:
 		msg := "unknown record type requested"
 		log.Print(msg)
@@ -235,15 +295,14 @@ func storeRecord(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateRecord(w http.ResponseWriter, r *http.Request) {
-	log.Print("updateRecord")
+	recordType := common.RecordType(chi.URLParam(r, "record_type"))
+	log.Print("updateRecord " + recordType)
 
 	user, _, ok := r.BasicAuth()
 	if !ok {
 		writeStatus(w, http.StatusBadRequest, "no basic auth")
 		return
 	}
-
-	recordType := common.RecordType(chi.URLParam(r, "record_type"))
 
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
@@ -287,6 +346,18 @@ func updateRecord(w http.ResponseWriter, r *http.Request) {
 		}
 		resp.Name = account.Name
 		updateErr = s.UpdateAccount(user, int64(id), account)
+	case common.NoteRecord:
+		var note common.Note
+		err = json.Unmarshal(body, &note)
+		if err != nil {
+			writeStatus(w,
+				http.StatusBadRequest,
+				fmt.Sprintf("Cannot Parse Body: %v", err),
+			)
+			return
+		}
+		resp.Name = note.Name
+		updateErr = s.UpdateNote(user, int64(id), note)
 	default:
 		msg := "unknown record type requested"
 		log.Print(msg)

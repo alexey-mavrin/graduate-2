@@ -120,7 +120,7 @@ go run cmd/client/main.go MODE -a ACTION flags
    ```
    go run cmd/server/main.go
    ```
-1. Зарегистрироватьс на сервере:
+1. Зарегистрироваться на сервере:
    ```
    $ go run cmd/client/main.go user -a register
    2022/04/30 09:17:26 user is registered with id 1

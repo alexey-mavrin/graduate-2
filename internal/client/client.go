@@ -12,6 +12,9 @@ const (
 	defaultClientTimeout = time.Second * 1
 )
 
+//go:generate go run tmpl/generator.go Account
+//go:generate go run tmpl/generator.go Note
+
 // Client describes general client configuration
 type Client struct {
 	ServerAddr string

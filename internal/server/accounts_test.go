@@ -45,7 +45,7 @@ func Test_Account(t *testing.T) {
 		createResp, _ := testHTTPRequest(t,
 			ts,
 			http.MethodPost,
-			"/accounts",
+			"/records/account",
 			string(accBody),
 			// correct user and pass
 			"user1",
@@ -57,7 +57,7 @@ func Test_Account(t *testing.T) {
 		getResp, getRespBody := testHTTPRequest(t,
 			ts,
 			http.MethodGet,
-			"/accounts/1",
+			"/records/account/1",
 			"",
 			// correct user and pass
 			"user1",
@@ -73,7 +73,7 @@ func Test_Account(t *testing.T) {
 		listResp, listRespBody := testHTTPRequest(t,
 			ts,
 			http.MethodGet,
-			"/accounts",
+			"/records/account",
 			"",
 			// correct user and pass
 			"user1",
@@ -91,7 +91,7 @@ func Test_Account(t *testing.T) {
 		delResp, _ := testHTTPRequest(t,
 			ts,
 			http.MethodDelete,
-			"/accounts/1",
+			"/records/account/1",
 			"",
 			// correct user and pass
 			"user1",
@@ -102,7 +102,7 @@ func Test_Account(t *testing.T) {
 		getResp2, _ := testHTTPRequest(t,
 			ts,
 			http.MethodGet,
-			"/accounts/1",
+			"/records/account/1",
 			"",
 			// correct user and pass
 			"user1",

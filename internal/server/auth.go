@@ -71,5 +71,5 @@ func pingHandler(w http.ResponseWriter, r *http.Request) {
 		writeStatus(w, http.StatusBadRequest, "no basic auth")
 		return
 	}
-	writeStatus(w, http.StatusOK, "OK. User: "+user)
+	writeStatus(w, http.StatusOK, "OK. User "+user)
 }

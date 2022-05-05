@@ -78,22 +78,38 @@ func Test_accountsCache(t *testing.T) {
 	_, err = clnt.RegisterUser("")
 	assert.NoError(t, err)
 
-	acc := common.Account{
+	acc1 := common.Account{
 		Name:     "local host",
 		UserName: "u",
 		Password: "p",
 		URL:      url,
 	}
 
-	id, err := clnt.StoreAccount(acc)
+	acc2 := common.Account{
+		Name:     "local host",
+		UserName: "u",
+		Password: "p",
+		URL:      url,
+	}
+
+	id1, err := clnt.StoreAccount(acc1)
+	assert.NoError(t, err)
+	id2, err := clnt.StoreAccount(acc2)
+	assert.NoError(t, err)
+	err = clnt.DeleteAccount(id2)
 	assert.NoError(t, err)
 
 	ts.Close()
 
 	// should get account from cache
-	gotAcc, err := clnt.GetAccount(id)
+	gotAcc, err := clnt.GetAccount(id1)
 	assert.NoError(t, err)
-	assert.Equal(t, gotAcc, acc)
+	assert.Equal(t, gotAcc, acc1)
+
+	// make sure cache has no stall records
+	ts.Close()
+	gotAcc, err = clnt.GetAccount(id2)
+	assert.Error(t, err)
 }
 
 func Test_accountsUpdateCache(t *testing.T) {

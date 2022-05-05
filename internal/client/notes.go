@@ -2,6 +2,7 @@ package client
 
 import (
 	"github.com/alexey-mavrin/graduate-2/internal/common"
+	"github.com/alexey-mavrin/graduate-2/internal/store"
 )
 
 // ListNotes lists account for the current user
@@ -15,7 +16,15 @@ func (c *Client) ListNotes() (common.Notes, error) {
 
 // DeleteNote returns account record with the given id
 func (c *Client) DeleteNote(id int64) error {
-	return c.deleteRecord(id, common.NoteRecord)
+	err := c.deleteRecord(id, common.NoteRecord)
+	if err != nil {
+		return err
+	}
+	err = c.cacheDeleteNote(id)
+	if err != nil && err != store.ErrNotFound {
+		return err
+	}
+	return nil
 }
 
 // GetNote returns account record with the given id

@@ -98,7 +98,6 @@ go run cmd/client/main.go MODE -a ACTION flags
      "store_file": "server_storage.db",
      "listen_port": 8443,
      "server_key": "keys/server.key",
-     "server_key": "keys/server.key",
      "server_crt": "keys/server.crt"
    }
    ```

@@ -16,13 +16,16 @@ import (
 //go:embed client.tmpl
 var clientTemplate string
 
+//go:embed cache.tmpl
+var cacheTemplate string
+
 type clientTParams struct {
 	RecordType common.RecordType
 }
 
-func generateClient(clientType common.RecordType) ([]byte, error) {
+func generateCode(tmpl string, clientType common.RecordType) ([]byte, error) {
 	buf := new(bytes.Buffer)
-	t, err := template.New("client").Parse(clientTemplate)
+	t, err := template.New("client").Parse(tmpl)
 	if err != nil {
 		return nil, err
 	}
@@ -49,11 +52,21 @@ func main() {
 	}
 
 	recordType := common.RecordType(os.Args[1])
-	p, err := generateClient(recordType)
+
+	p, err := generateCode(clientTemplate, recordType)
 	if err != nil {
 		log.Fatal(err)
 	}
 	err = os.WriteFile(string(recordType)+"_client.go", p, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	p, err = generateCode(cacheTemplate, recordType)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = os.WriteFile(string(recordType)+"_cache.go", p, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}

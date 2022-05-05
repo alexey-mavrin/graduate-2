@@ -5,7 +5,7 @@
 1. Протокол взаимодействия - REST (или что-то на него похожее)
 1. Хранение данных на стороне сервера: сейчас sqlite, в принципе, несложно
    перейти на другой вариант SQL БД.
-1. Аутентификация - basic + https (https пока не реализован, TODO: добавить https)
+1. Аутентификация - basic + https
 1. сохраняемые данные - на настоящий момент пароли (`Accounts`)
    и текстовые записи (`Notes`)
    TODO: добавить типы - бинарные данные и данные карт.
@@ -96,18 +96,25 @@ go run cmd/client/main.go MODE -a ACTION flags
    ```
    {
      "store_file": "server_storage.db",
-     "listen_port": 8088
+     "listen_port": 8443,
+     "server_key": "keys/server.key",
+     "server_key": "keys/server.key",
+     "server_crt": "keys/server.crt"
    }
    ```
+1. Скопировать ключ и сертификат сервера в соответствующие файлы.
+   Можно изготовить самоподписанный сертификат через команду `make key`.
 1. Сделать конфигурационный файл клиента `gosecret.cfg` (имя можно задать
-   в переменной окружения `GOSECRET_CFG`):
+   в переменной окружения `GOSECRET_CFG`). Если для сервера применяется
+   самоподписанный сертификат, нужно выставить `https_insecure` в `true`.
    ```
    {
      "user_name": "user1",
      "password": "pass",
      "full_name": "Full Name",
-     "server_address": "http://localhost:8088"
-     "cache_file": "cache_store.db"
+     "server_address": "https://localhost:8443"
+     "cache_file": "cache_store.db",
+     "https_insecure": true
    }
    ```
 1. Запустить сервер
@@ -119,7 +126,7 @@ go run cmd/client/main.go MODE -a ACTION flags
    $ go run cmd/client/main.go user -a register
    2022/04/30 09:17:26 user is registered with id 1
    ```
-1. Проверить регистарцию:
+1. Проверить регистрацию:
    ```
    $ go run cmd/client/main.go user -a verify
    2022/04/30 09:18:11 user is verified

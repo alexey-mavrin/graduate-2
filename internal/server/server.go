@@ -39,7 +39,7 @@ func checkSetContentType(next http.Handler) http.Handler {
 }
 
 // StartServer starts the server
-func StartServer(listenPort int, storeFile string) error {
+func StartServer(listenPort int, storeFile, keyFile, crtFile string) error {
 	store.DBFile = storeFile
 	if storeFile == "" {
 		store.DBFile = defaultStoreFile
@@ -54,7 +54,7 @@ func StartServer(listenPort int, storeFile string) error {
 	c := make(chan error)
 	go func() {
 		log.Printf("Listening on %v...", listenAddress)
-		err := http.ListenAndServe(listenAddress, r)
+		err := http.ListenAndServeTLS(listenAddress, crtFile, keyFile, r)
 		c <- err
 	}()
 

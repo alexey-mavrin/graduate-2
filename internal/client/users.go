@@ -17,7 +17,7 @@ func (c Client) VerifyUser() error {
 		return err
 	}
 
-	client := &http.Client{}
+	client := c.httpClient()
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
@@ -59,7 +59,7 @@ func (c Client) RegisterUser(fullName string) (int64, error) {
 
 	req.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{}
+	client := c.httpClient()
 
 	resp, err := client.Do(req)
 	if err != nil {

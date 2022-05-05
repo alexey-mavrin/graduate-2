@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"crypto/tls"
 	"net/http"
 	"time"
 
@@ -17,11 +18,12 @@ const (
 
 // Client describes general client configuration
 type Client struct {
-	ServerAddr string
-	UserName   string
-	UserPass   string
-	CacheFile  string
-	Timeout    time.Duration
+	ServerAddr    string
+	UserName      string
+	UserPass      string
+	CacheFile     string
+	Timeout       time.Duration
+	HTTPSInsecure bool
 }
 
 // NewClient returns new client
@@ -29,14 +31,16 @@ func NewClient(serverAddr string,
 	userName string,
 	userPass string,
 	cacheFile string,
+	httpsInsecure bool,
 ) *Client {
 	store.DBFile = cacheFile
 	return &Client{
-		ServerAddr: serverAddr,
-		UserName:   userName,
-		UserPass:   userPass,
-		CacheFile:  cacheFile,
-		Timeout:    defaultClientTimeout,
+		ServerAddr:    serverAddr,
+		UserName:      userName,
+		UserPass:      userPass,
+		CacheFile:     cacheFile,
+		Timeout:       defaultClientTimeout,
+		HTTPSInsecure: httpsInsecure,
 	}
 }
 
@@ -51,4 +55,17 @@ func (c *Client) prepaReq(method, path string, body []byte) (*http.Request, erro
 	req.Header.Set("Content-Type", "application/json")
 
 	return req, nil
+}
+
+func (c *Client) httpClient() *http.Client {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: c.HTTPSInsecure,
+		},
+	}
+	client := &http.Client{
+		Timeout:   c.Timeout,
+		Transport: tr,
+	}
+	return client
 }

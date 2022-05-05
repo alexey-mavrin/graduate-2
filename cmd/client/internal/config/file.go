@@ -7,11 +7,12 @@ import (
 
 // Config contains client config parameters set in the config file
 type Config struct {
-	UserName   string `json:"user_name"`
-	Password   string `json:"password"`
-	FullName   string `json:"full_name"`
-	ServerAddr string `json:"server_address"`
-	CacheFile  string `json:"cache_file"`
+	UserName      string `json:"user_name"`
+	Password      string `json:"password"`
+	FullName      string `json:"full_name"`
+	ServerAddr    string `json:"server_address"`
+	CacheFile     string `json:"cache_file"`
+	HTTPSInsecure bool   `json:"https_insecure"`
 }
 
 // Cfg holds global parameters from config file

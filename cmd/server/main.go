@@ -23,7 +23,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = server.StartServer(config.Cfg.ListenPort, config.Cfg.StoreFile)
+	err = server.StartServer(
+		config.Cfg.ListenPort,
+		config.Cfg.StoreFile,
+		config.Cfg.ServerKey,
+		config.Cfg.ServerCRT,
+	)
 	if err != nil {
 		log.Fatal(err)
 	}

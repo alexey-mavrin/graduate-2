@@ -8,6 +8,8 @@ import (
 // Config contains client config parameters set in the config file
 type Config struct {
 	StoreFile  string `json:"store_file"`
+	ServerKey  string `json:"server_key"`
+	ServerCRT  string `json:"server_crt"`
 	ListenPort int    `json:"listen_port"`
 }
 

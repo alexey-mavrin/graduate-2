@@ -19,9 +19,7 @@ func (c *Client) listRecords(t common.RecordType) (common.Records, error) {
 		return records, err
 	}
 
-	client := &http.Client{
-		Timeout: c.Timeout,
-	}
+	client := c.httpClient()
 	resp, err := client.Do(req)
 	if err != nil {
 		return records, err
@@ -69,9 +67,7 @@ func (c *Client) deleteRecord(id int64, t common.RecordType) error {
 		return err
 	}
 
-	client := &http.Client{
-		Timeout: c.Timeout,
-	}
+	client := c.httpClient()
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
@@ -109,9 +105,7 @@ func (c *Client) getRecord(id int64, t common.RecordType) (common.Record, error)
 		return record, err
 	}
 
-	client := &http.Client{
-		Timeout: c.Timeout,
-	}
+	client := c.httpClient()
 	resp, err := client.Do(req)
 	record.Type = t
 	if err != nil {
@@ -199,9 +193,7 @@ func (c *Client) updateRecord(id int64, record common.Record) error {
 		return err
 	}
 
-	client := &http.Client{
-		Timeout: c.Timeout,
-	}
+	client := c.httpClient()
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
@@ -265,9 +257,7 @@ func (c *Client) storeRecord(record common.Record) (int64, error) {
 		return 0, err
 	}
 
-	client := &http.Client{
-		Timeout: c.Timeout,
-	}
+	client := c.httpClient()
 	resp, err := client.Do(req)
 	if err != nil {
 		return 0, err

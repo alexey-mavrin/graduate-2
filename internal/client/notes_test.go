@@ -19,7 +19,7 @@ func Test_notes(t *testing.T) {
 	text := "note text"
 	text1 := "note text 1"
 
-	clnt := NewClient(ts.URL, userName, userPass, "")
+	clnt := NewClient(ts.URL, userName, userPass, "", false)
 
 	_, err = clnt.RegisterUser("")
 	assert.NoError(t, err)
@@ -70,7 +70,7 @@ func Test_notesCache(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	clnt := NewClient(ts.URL, userName, userPass, cacheName)
+	clnt := NewClient(ts.URL, userName, userPass, cacheName, false)
 
 	_, err = clnt.RegisterUser("")
 	assert.NoError(t, err)
@@ -106,7 +106,7 @@ func Test_notesUpdateCache(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	clnt := NewClient(ts.URL, userName, userPass, cacheName)
+	clnt := NewClient(ts.URL, userName, userPass, cacheName, false)
 
 	_, err = clnt.RegisterUser("")
 	assert.NoError(t, err)
@@ -150,7 +150,7 @@ func Test_notesDeleteCache(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	clnt := NewClient(ts.URL, userName, userPass, cacheName)
+	clnt := NewClient(ts.URL, userName, userPass, cacheName, false)
 
 	_, err = clnt.RegisterUser("")
 	assert.NoError(t, err)

@@ -15,6 +15,7 @@ func actUser(subop config.OpSubtype, user common.User) error {
 		config.Cfg.UserName,
 		config.Cfg.Password,
 		config.Cfg.CacheFile,
+		config.Cfg.HTTPSInsecure,
 	)
 	switch subop {
 	case config.OpSubtypeUserRegister:
@@ -38,6 +39,7 @@ func actAccount(subop config.OpSubtype, acc common.Account) error {
 		config.Cfg.UserName,
 		config.Cfg.Password,
 		config.Cfg.CacheFile,
+		config.Cfg.HTTPSInsecure,
 	)
 	switch subop {
 	case config.OpSubtypeRecordStore:
@@ -79,6 +81,7 @@ func actNote(subop config.OpSubtype, note common.Note) error {
 		config.Cfg.UserName,
 		config.Cfg.Password,
 		config.Cfg.CacheFile,
+		config.Cfg.HTTPSInsecure,
 	)
 	switch subop {
 	case config.OpSubtypeRecordStore:

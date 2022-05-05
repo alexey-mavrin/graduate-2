@@ -19,7 +19,7 @@ func Test_accounts(t *testing.T) {
 	url := "http://localhost"
 	url1 := "http://localhost:8080"
 
-	clnt := NewClient(ts.URL, userName, userPass, "")
+	clnt := NewClient(ts.URL, userName, userPass, "", false)
 
 	_, err = clnt.RegisterUser("")
 	assert.NoError(t, err)
@@ -73,7 +73,7 @@ func Test_accountsCache(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	clnt := NewClient(ts.URL, userName, userPass, cacheName)
+	clnt := NewClient(ts.URL, userName, userPass, cacheName, false)
 
 	_, err = clnt.RegisterUser("")
 	assert.NoError(t, err)
@@ -127,7 +127,7 @@ func Test_accountsUpdateCache(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	clnt := NewClient(ts.URL, userName, userPass, cacheName)
+	clnt := NewClient(ts.URL, userName, userPass, cacheName, false)
 
 	_, err = clnt.RegisterUser("")
 	assert.NoError(t, err)
@@ -175,7 +175,7 @@ func Test_accountsDeleteCache(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	clnt := NewClient(ts.URL, userName, userPass, cacheName)
+	clnt := NewClient(ts.URL, userName, userPass, cacheName, false)
 
 	_, err = clnt.RegisterUser("")
 	assert.NoError(t, err)

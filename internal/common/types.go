@@ -1,5 +1,8 @@
 package common
 
+// Key is the AES key type used
+type Key [32]byte
+
 // User is the client of the secret store service
 type User struct {
 	Name     string `json:"name"`

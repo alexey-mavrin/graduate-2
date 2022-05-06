@@ -99,8 +99,7 @@ func (s *Store) ListAccounts(user string) (common.Accounts, error) {
 
 	accs := make(common.Accounts)
 	rows, err := secretStore.db.Query(
-		`SELECT accounts.id, accounts.name, accounts.url,
-			accounts.user_name, accounts.meta
+		`SELECT accounts.id, accounts.name, accounts.url, accounts.user_name
 			FROM accounts JOIN users ON accounts.user_id = users.id
 			WHERE users.user = ?`,
 		user,
@@ -112,7 +111,7 @@ func (s *Store) ListAccounts(user string) (common.Accounts, error) {
 	for rows.Next() {
 		var id int64
 		var acc common.Account
-		err = rows.Scan(&id, &acc.Name, &acc.URL, &acc.UserName, &acc.Meta)
+		err = rows.Scan(&id, &acc.Name, &acc.URL, &acc.UserName)
 		if err != nil {
 			return accs, err
 		}

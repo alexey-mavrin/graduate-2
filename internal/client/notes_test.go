@@ -34,6 +34,7 @@ func Test_notes(t *testing.T) {
 
 	notes, err := clnt.ListNotes()
 	respNote := note
+	respNote.Text = ""
 
 	assert.Equal(t, respNote, notes[id])
 

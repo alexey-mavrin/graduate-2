@@ -93,7 +93,7 @@ func (s *Store) ListNotes(user string) (common.Notes, error) {
 
 	notes := make(common.Notes)
 	rows, err := secretStore.db.Query(
-		`SELECT notes.id, notes.name, notes.text, notes.meta
+		`SELECT notes.id, notes.name
 			FROM notes JOIN users ON notes.user_id = users.id
 			WHERE users.user = ?`,
 		user,
@@ -105,7 +105,7 @@ func (s *Store) ListNotes(user string) (common.Notes, error) {
 	for rows.Next() {
 		var id int64
 		var note common.Note
-		err = rows.Scan(&id, &note.Name, &note.Text, &note.Meta)
+		err = rows.Scan(&id, &note.Name)
 		if err != nil {
 			return notes, err
 		}

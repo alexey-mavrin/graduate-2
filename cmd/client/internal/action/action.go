@@ -8,6 +8,7 @@ import (
 	"github.com/alexey-mavrin/graduate-2/cmd/client/internal/config"
 	"github.com/alexey-mavrin/graduate-2/internal/client"
 	"github.com/alexey-mavrin/graduate-2/internal/common"
+	"github.com/alexey-mavrin/graduate-2/internal/crypt"
 )
 
 func actUser(subop config.OpSubtype, user common.User) error {
@@ -43,13 +44,21 @@ func actAccount(subop config.OpSubtype, acc common.Account) error {
 	)
 	switch subop {
 	case config.OpSubtypeRecordStore:
-		id, err := clnt.StoreAccount(config.Op.Account)
+		eAcc, err := crypt.EncryptAccount(*config.Key, config.Op.Account)
+		if err != nil {
+			return err
+		}
+		id, err := clnt.StoreAccount(eAcc)
 		if err != nil {
 			return err
 		}
 		fmt.Printf("accout record stored with id %d\n", id)
 	case config.OpSubtypeRecordGet:
-		acc, err := clnt.GetAccount(config.Op.AccountID)
+		eAcc, err := clnt.GetAccount(config.Op.AccountID)
+		if err != nil {
+			return err
+		}
+		acc, err := crypt.DecryptAccount(*config.Key, eAcc)
 		if err != nil {
 			return err
 		}
@@ -61,7 +70,11 @@ func actAccount(subop config.OpSubtype, acc common.Account) error {
 		}
 		fmt.Println(accs)
 	case config.OpSubtypeRecordUpdate:
-		err := clnt.UpdateAccount(config.Op.AccountID, config.Op.Account)
+		eAcc, err := crypt.EncryptAccount(*config.Key, config.Op.Account)
+		if err != nil {
+			return err
+		}
+		err = clnt.UpdateAccount(config.Op.AccountID, eAcc)
 		if err != nil {
 			return err
 		}
@@ -85,13 +98,21 @@ func actNote(subop config.OpSubtype, note common.Note) error {
 	)
 	switch subop {
 	case config.OpSubtypeRecordStore:
-		id, err := clnt.StoreNote(config.Op.Note)
+		eNote, err := crypt.EncryptNote(*config.Key, config.Op.Note)
+		if err != nil {
+			return err
+		}
+		id, err := clnt.StoreNote(eNote)
 		if err != nil {
 			return err
 		}
 		fmt.Printf("note record stored with id %d\n", id)
 	case config.OpSubtypeRecordGet:
-		note, err := clnt.GetNote(config.Op.NoteID)
+		eNote, err := clnt.GetNote(config.Op.NoteID)
+		if err != nil {
+			return err
+		}
+		note, err := crypt.DecryptNote(*config.Key, eNote)
 		if err != nil {
 			return err
 		}
@@ -103,7 +124,11 @@ func actNote(subop config.OpSubtype, note common.Note) error {
 		}
 		fmt.Println(notes)
 	case config.OpSubtypeRecordUpdate:
-		err := clnt.UpdateNote(config.Op.NoteID, config.Op.Note)
+		eNote, err := clnt.GetNote(config.Op.NoteID)
+		if err != nil {
+			return err
+		}
+		err = clnt.UpdateNote(config.Op.NoteID, eNote)
 		if err != nil {
 			return err
 		}

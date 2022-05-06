@@ -3,7 +3,12 @@ package config
 import (
 	"encoding/json"
 	"os"
+
+	"github.com/alexey-mavrin/graduate-2/internal/common"
 )
+
+// Key is the encryption key
+var Key *common.Key
 
 // Config contains client config parameters set in the config file
 type Config struct {
@@ -12,6 +17,7 @@ type Config struct {
 	FullName      string `json:"full_name"`
 	ServerAddr    string `json:"server_address"`
 	CacheFile     string `json:"cache_file"`
+	KeyPhraseFile string `json:"key_phrase_file"`
 	HTTPSInsecure bool   `json:"https_insecure"`
 }
 
@@ -27,6 +33,11 @@ func ParseConfigFile(file string) error {
 	}
 
 	err = json.Unmarshal(cFileData, &Cfg)
+	if err != nil {
+		return err
+	}
+
+	Key, err = GetKey(Cfg.KeyPhraseFile)
 	if err != nil {
 		return err
 	}

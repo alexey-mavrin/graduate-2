@@ -62,17 +62,14 @@ func TestStore_ListNotes(t *testing.T) {
 		notes, err := store.ListNotes(user)
 		assert.NoError(t, err)
 
-		wantAccs := make(common.Notes)
-		wantAccs[id1] = common.Note{
+		wantNotes := make(common.Notes)
+		wantNotes[id1] = common.Note{
 			Name: name1,
-			Text: text1,
 		}
-		wantAccs[id2] = common.Note{
+		wantNotes[id2] = common.Note{
 			Name: name2,
-			Text: text2,
 		}
-
-		assert.True(t, reflect.DeepEqual(notes, wantAccs))
+		assert.True(t, reflect.DeepEqual(notes, wantNotes))
 	})
 }
 

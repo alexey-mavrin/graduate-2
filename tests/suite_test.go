@@ -56,7 +56,6 @@ func startCmd(cmdLine string, env []string) (*exec.Cmd, error) {
 
 // stopCmd kills the previously started process
 func stopCmd(cmd *exec.Cmd) error {
-	fmt.Printf("------------ %v\n", cmd.Process)
 	return cmd.Process.Kill()
 }
 
@@ -118,7 +117,7 @@ var _ = Describe("Run server and client together", func() {
 		})
 
 		It("Should store and retrieve note", func() {
-			By("Running 'client acc -a store'")
+			By("Running 'client note -a store'")
 			_, _, err := runClient("user -a register")
 			Expect(err).NotTo(HaveOccurred(), "Client should register")
 
@@ -129,6 +128,23 @@ var _ = Describe("Run server and client together", func() {
 			Expect(err).NotTo(HaveOccurred(), "Client should run OK")
 			stdOut, stdErr, err = runClient(
 				"note -a get -i 1",
+			)
+			fmt.Print(stdOut, stdErr)
+			Expect(err).NotTo(HaveOccurred(), "Client should run OK")
+		})
+
+		It("Should store and retrieve card", func() {
+			By("Running 'client card -a store'")
+			_, _, err := runClient("user -a register")
+			Expect(err).NotTo(HaveOccurred(), "Client should register")
+
+			stdOut, stdErr, err := runClient(
+				"card -a store -num 1111222233334444, -c 123",
+			)
+			fmt.Print(stdOut, stdErr)
+			Expect(err).NotTo(HaveOccurred(), "Client should run OK")
+			stdOut, stdErr, err = runClient(
+				"card -a get -i 1",
 			)
 			fmt.Print(stdOut, stdErr)
 			Expect(err).NotTo(HaveOccurred(), "Client should run OK")

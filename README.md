@@ -6,9 +6,9 @@
 1. Хранение данных на стороне сервера: сейчас sqlite, в принципе, несложно
    перейти на другой вариант SQL БД.
 1. Аутентификация - basic + https
-1. сохраняемые данные - на настоящий момент пароли (`Accounts`)
-   и текстовые записи (`Notes`)
-   TODO: добавить типы - бинарные данные и данные карт.
+1. сохраняемые данные - на настоящий момент пароли (`Accounts`),
+   текстовые записи (`Notes`) и данные платёжных карт (`Cards`)
+   TODO: добавить бинарные данные
 1. Шифрование данных: на стороне клиента с помощью мастер-ключа
    алгоритмом AES. Данные шифруются перед отправкой на сервер и кэшированием.
    Шифруются поля `Password` и `Meta` для `Account`, и `Text` и `Meta` для `Note`.
@@ -28,7 +28,7 @@
    * `internal/store/`: код, работающий с БД
    * `internal/server/`: код, работающий в http-сервере
    * `internal/client/`: код, работающий в http-клиенте
-   * `internal/client/tmpl/`: шаблон для автогенерации кода клиента
+   * `internal/client/tmpl/`: шаблоны для автогенерации кода клиента
    * `cmd/server/`: код для запуска сервера
    * `cmd/client/`: код для запуска клиента
 
@@ -54,10 +54,10 @@ TODO:
 go run cmd/client/main.go MODE -a ACTION flags
 ```
 гдеs
-* `MODE` - один из `user`, `acc`, `note`
+* `MODE` - один из `user`, `acc`, `note`, `card`
 * `ACTION`
   * для режима `user` один из `register` или `verify`
-  * для режимов `acc` или `note` - один из
+  * для режимов `acc`, `note` или `card` - один из
     `list`, `store`, `get`, `update` или `delete`
 * `flags`:
   * `-h` - получить справку по флагам
@@ -87,6 +87,26 @@ go run cmd/client/main.go MODE -a ACTION flags
     -t string
     	note text
     ```
+  * для режима `card`:
+    ```
+    -c string
+    	card CVC code
+    -ch string
+    	card holder
+    -em int
+    	card expiry month
+    -ey int
+    	card expiry year
+    -i int
+    	card ID
+    -m string
+    	card metainfo
+    -n string
+    	card name
+    -num string
+    	card number
+    ```
+
 
 ## Использование
 
@@ -133,6 +153,13 @@ go run cmd/client/main.go MODE -a ACTION flags
    $ go run cmd/client/main.go user -a verify
    2022/04/30 09:18:11 user is verified
    ```
+
+Далее показаны действия по работе с аккаунтами (логин-пароль-url-мета).
+Для других типов данных (платёжные карты и текстовые записи)
+действия аналогичны.
+
+Для бинарных данных действия отличаются (TODO: добавить)
+
 1. Сохранить данные аккаунтов:
    ```
    $ go run cmd/client/main.go acc -a store \

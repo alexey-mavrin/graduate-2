@@ -26,11 +26,23 @@ type Note struct {
 	Meta string `json:"meta"`
 }
 
+// Card holds creditcard data
+type Card struct {
+	Name     string `json:"name"`
+	Holder   string `json:"holder"`
+	Number   string `json:"number"`
+	ExpMonth int    `json:"exp_month"`
+	ExpYear  int    `json:"exp_year"`
+	CVC      string `json:"cvc"`
+	Meta     string `json:"meta"`
+}
+
 // Record can hold any record that could be stored
 type Record struct {
 	Type    RecordType
 	Account *Account
 	Note    *Note
+	Card    *Card
 }
 
 // Records can hold the map of any record that could be stored
@@ -38,6 +50,7 @@ type Records struct {
 	Type     RecordType
 	Accounts *Accounts
 	Notes    *Notes
+	Cards    *Cards
 }
 
 // RecordType is the type of record conveyed
@@ -48,6 +61,8 @@ const (
 	AccountRecord RecordType = "account"
 	// NoteRecord is the Note record type
 	NoteRecord RecordType = "note"
+	// CardRecord is the Card record type
+	CardRecord RecordType = "card"
 )
 
 // Accounts holds list of accounts indexed by id
@@ -55,6 +70,9 @@ type Accounts map[int64]Account
 
 // Notes holds list of notes indexed by id
 type Notes map[int64]Note
+
+// Cards holds list of notes indexed by id
+type Cards map[int64]Card
 
 // AddUserResponse is the response for AddUser request
 type AddUserResponse struct {

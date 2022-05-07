@@ -123,6 +123,25 @@ func NewStore() (*Store, error) {
 		return secretStore, err
 	}
 
+	_, err = secretStore.db.Exec(`CREATE TABLE IF NOT EXISTS cards (
+		id INTEGER PRIMARY KEY,
+		user_id INTEGER NOT NULL,
+		name TEXT NOT NULL,
+		holder TEXT,
+		number TEXT,
+		expm INT,
+		expy INT,
+		cvc TEXT,
+		meta TEXT,
+		FOREIGN KEY (user_id)
+		  REFERENCES users (id)
+		    ON DELETE CASCADE
+		    ON UPDATE NO ACTION
+	)`)
+	if err != nil {
+		return secretStore, err
+	}
+
 	return secretStore, nil
 }
 

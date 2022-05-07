@@ -49,6 +49,13 @@ func listRecords(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		encodeErr = json.NewEncoder(w).Encode(notes)
+	case common.CardRecord:
+		var cards common.Cards
+		cards, listErr = s.ListCards(user)
+		if listErr != nil {
+			break
+		}
+		encodeErr = json.NewEncoder(w).Encode(cards)
 	default:
 		msg := "unknown record type requested"
 		log.Print(msg)
@@ -115,6 +122,13 @@ func getRecord(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		encodeErr = json.NewEncoder(w).Encode(note)
+	case common.CardRecord:
+		var card common.Card
+		card, getErr = s.GetCard(user, int64(id))
+		if getErr != nil {
+			break
+		}
+		encodeErr = json.NewEncoder(w).Encode(card)
 	default:
 		msg := "unknown record type requested"
 		log.Print(msg)
@@ -180,6 +194,8 @@ func deleteRecord(w http.ResponseWriter, r *http.Request) {
 		deleteErr = s.DeleteAccount(user, int64(id))
 	case common.NoteRecord:
 		deleteErr = s.DeleteNote(user, int64(id))
+	case common.CardRecord:
+		deleteErr = s.DeleteCard(user, int64(id))
 	default:
 		msg := "unknown record type requested"
 		log.Print(msg)
@@ -265,6 +281,18 @@ func storeRecord(w http.ResponseWriter, r *http.Request) {
 		}
 		resp.Name = note.Name
 		resp.ID, storeErr = s.StoreNote(user, note)
+	case common.CardRecord:
+		var card common.Card
+		err = json.Unmarshal(body, &card)
+		if err != nil {
+			writeStatus(w,
+				http.StatusBadRequest,
+				fmt.Sprintf("Cannot Parse Body: %v", err),
+			)
+			return
+		}
+		resp.Name = card.Name
+		resp.ID, storeErr = s.StoreCard(user, card)
 	default:
 		msg := "unknown record type requested"
 		log.Print(msg)
@@ -358,6 +386,18 @@ func updateRecord(w http.ResponseWriter, r *http.Request) {
 		}
 		resp.Name = note.Name
 		updateErr = s.UpdateNote(user, int64(id), note)
+	case common.CardRecord:
+		var card common.Card
+		err = json.Unmarshal(body, &card)
+		if err != nil {
+			writeStatus(w,
+				http.StatusBadRequest,
+				fmt.Sprintf("Cannot Parse Body: %v", err),
+			)
+			return
+		}
+		resp.Name = card.Name
+		updateErr = s.UpdateCard(user, int64(id), card)
 	default:
 		msg := "unknown record type requested"
 		log.Print(msg)

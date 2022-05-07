@@ -32,6 +32,10 @@ func (c *Client) listRecords(t common.RecordType) (common.Records, error) {
 			notes, err := c.cacheListNotes()
 			records.Notes = &notes
 			return records, err
+		case common.CardRecord:
+			cards, err := c.cacheListCards()
+			records.Cards = &cards
+			return records, err
 		default:
 			return records, fmt.Errorf("unknown record type %s", t)
 		}
@@ -62,6 +66,10 @@ func (c *Client) listRecords(t common.RecordType) (common.Records, error) {
 		notes := make(common.Notes)
 		parseErr = json.Unmarshal(respBody, &notes)
 		records.Notes = &notes
+	case common.CardRecord:
+		cards := make(common.Cards)
+		parseErr = json.Unmarshal(respBody, &cards)
+		records.Cards = &cards
 	default:
 		return records, fmt.Errorf("unknown record type %s", t)
 	}
@@ -131,6 +139,10 @@ func (c *Client) getRecord(id int64, t common.RecordType) (common.Record, error)
 			note, err := c.cacheGetNote(id)
 			record.Note = &note
 			return record, err
+		case common.CardRecord:
+			card, err := c.cacheGetCard(id)
+			record.Card = &card
+			return record, err
 		default:
 			return record, fmt.Errorf("unknown record type %s", t)
 		}
@@ -168,6 +180,14 @@ func (c *Client) getRecord(id int64, t common.RecordType) (common.Record, error)
 		}
 		record.Note = &note
 		cacheErr = c.cacheNote(id, note)
+	case common.CardRecord:
+		var card common.Card
+		parseErr = json.Unmarshal(respBody, &card)
+		if parseErr != nil {
+			break
+		}
+		record.Card = &card
+		cacheErr = c.cacheCard(id, card)
 	default:
 		parseErr = fmt.Errorf("unknown type: %s", t)
 		cacheErr = fmt.Errorf("unknown type: %s", t)
@@ -192,6 +212,8 @@ func (c *Client) updateRecord(id int64, record common.Record) error {
 		body, encodeErr = json.Marshal(*record.Account)
 	case common.NoteRecord:
 		body, encodeErr = json.Marshal(*record.Note)
+	case common.CardRecord:
+		body, encodeErr = json.Marshal(*record.Card)
 	default:
 		encodeErr = fmt.Errorf("unknown record type %s", record.Type)
 	}
@@ -236,6 +258,8 @@ func (c *Client) updateRecord(id int64, record common.Record) error {
 		cacheErr = c.cacheAccount(id, *record.Account)
 	case common.NoteRecord:
 		cacheErr = c.cacheNote(id, *record.Note)
+	case common.CardRecord:
+		cacheErr = c.cacheCard(id, *record.Card)
 	default:
 		cacheErr = fmt.Errorf("unknown record type: %s", record.Type)
 	}
@@ -256,6 +280,8 @@ func (c *Client) storeRecord(record common.Record) (int64, error) {
 		body, encodeErr = json.Marshal(*record.Account)
 	case common.NoteRecord:
 		body, encodeErr = json.Marshal(*record.Note)
+	case common.CardRecord:
+		body, encodeErr = json.Marshal(*record.Card)
 	default:
 		encodeErr = fmt.Errorf("unknown record type %s", record.Type)
 	}
@@ -301,6 +327,8 @@ func (c *Client) storeRecord(record common.Record) (int64, error) {
 		cacheErr = c.cacheAccount(status.ID, *record.Account)
 	case common.NoteRecord:
 		cacheErr = c.cacheNote(status.ID, *record.Note)
+	case common.CardRecord:
+		cacheErr = c.cacheCard(status.ID, *record.Card)
 	default:
 		cacheErr = fmt.Errorf("unknown record type: %s", record.Type)
 	}

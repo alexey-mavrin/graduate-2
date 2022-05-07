@@ -22,7 +22,19 @@ func (c *Client) listRecords(t common.RecordType) (common.Records, error) {
 	client := c.httpClient()
 	resp, err := client.Do(req)
 	if err != nil {
-		return records, err
+		log.Printf("cannot contact the server: %v, trying local cache", err)
+		switch t {
+		case common.AccountRecord:
+			accounts, err := c.cacheListAccounts()
+			records.Accounts = &accounts
+			return records, err
+		case common.NoteRecord:
+			notes, err := c.cacheListNotes()
+			records.Notes = &notes
+			return records, err
+		default:
+			return records, fmt.Errorf("unknown record type %s", t)
+		}
 	}
 	defer resp.Body.Close()
 

@@ -106,6 +106,14 @@ func Test_accountsCache(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, gotAcc, acc1)
 
+	// should list accounts from cache
+	gotAccs, err := clnt.ListAccounts()
+	acc1NoSecret := acc1
+	acc1NoSecret.Password = ""
+	acc1NoSecret.Meta = ""
+	assert.NoError(t, err)
+	assert.Equal(t, gotAccs[1], acc1NoSecret)
+
 	// make sure cache has no stall records
 	ts.Close()
 	gotAcc, err = clnt.GetAccount(id2)

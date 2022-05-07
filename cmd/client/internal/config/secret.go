@@ -8,7 +8,9 @@ import (
 	"github.com/alexey-mavrin/graduate-2/internal/crypt"
 )
 
-func checkFileMode(file string) (bool, error) {
+// CheckFileMode returns true if the named file is not readable
+// or writeable by anyone except the owner
+func CheckFileMode(file string) (bool, error) {
 	fileInfo, err := os.Stat(file)
 	if err != nil {
 		return false, err
@@ -25,7 +27,7 @@ const minPhraseLen = 10
 // GetKey returns a key computed from the given file content.
 // It checks proper file permission and can check secret phrase strength.
 func GetKey(file string) (*common.Key, error) {
-	modeOK, err := checkFileMode(file)
+	modeOK, err := CheckFileMode(file)
 	if err != nil {
 		return nil, err
 	}

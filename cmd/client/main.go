@@ -17,6 +17,14 @@ func main() {
 		configFile = defaultConfigFile
 	}
 
+	ok, err = config.CheckFileMode(configFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if !ok {
+		log.Fatal("wrong config file mode")
+	}
+
 	err = config.ParseConfigFile(configFile)
 	if err != nil {
 		log.Fatal(err)

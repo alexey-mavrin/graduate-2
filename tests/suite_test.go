@@ -92,12 +92,46 @@ var _ = Describe("Run server and client together", func() {
 		Expect(cmdErr).NotTo(HaveOccurred(), "Server should stop")
 	})
 
-	Describe("Register user", func() {
-		It("Should successfully register", func() {
+	Describe("Basic usage", func() {
+		It("Should successfully register user", func() {
 			By("Running client with 'user -a register'")
 			stdOut, stdErr, err := runClient("user -a register")
-			Expect(err).NotTo(HaveOccurred(), "Client should run OK")
 			fmt.Print(stdOut, stdErr)
+			Expect(err).NotTo(HaveOccurred(), "Client should register")
+		})
+
+		It("Should store and retrieve account", func() {
+			By("Running 'client acc -a store'")
+			_, _, err := runClient("user -a register")
+			Expect(err).NotTo(HaveOccurred(), "Client should register")
+
+			stdOut, stdErr, err := runClient(
+				"acc -a store -n acc_name_1, -u u1 -p pass1",
+			)
+			fmt.Print(stdOut, stdErr)
+			Expect(err).NotTo(HaveOccurred(), "Client should run OK")
+			stdOut, stdErr, err = runClient(
+				"acc -a get -i 1",
+			)
+			fmt.Print(stdOut, stdErr)
+			Expect(err).NotTo(HaveOccurred(), "Client should run OK")
+		})
+
+		It("Should store and retrieve note", func() {
+			By("Running 'client acc -a store'")
+			_, _, err := runClient("user -a register")
+			Expect(err).NotTo(HaveOccurred(), "Client should register")
+
+			stdOut, stdErr, err := runClient(
+				"note -a store -n note_name_1, -t text1",
+			)
+			fmt.Print(stdOut, stdErr)
+			Expect(err).NotTo(HaveOccurred(), "Client should run OK")
+			stdOut, stdErr, err = runClient(
+				"note -a get -i 1",
+			)
+			fmt.Print(stdOut, stdErr)
+			Expect(err).NotTo(HaveOccurred(), "Client should run OK")
 		})
 	})
 })

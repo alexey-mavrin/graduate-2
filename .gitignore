@@ -9,6 +9,7 @@
 # sqlite databases
 *.db
 
+# binaries
 main
 client
 server

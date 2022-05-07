@@ -1,3 +1,9 @@
+client:
+	go build -o client cmd/client/main.go
+
+server:
+	go build -o server cmd/server/main.go
+
 key:
 	openssl req -new -subj "/C=RU/ST=SPb/CN=localhost" \
 		-newkey rsa:2048 -nodes -keyout keys/server.key \

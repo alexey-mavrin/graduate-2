@@ -9,6 +9,10 @@
 # sqlite databases
 *.db
 
+main
+client
+server
+
 # Test binary, built with `go test -c`
 *.test
 

@@ -77,3 +77,16 @@ func (c *Client) cacheGetNote(id int64) (common.Note, error) {
 	}
 	return cache.GetNote(c.UserName, id)
 }
+
+func (c *Client) cacheListNotes() (common.Notes, error) {
+	records := make(common.Notes)
+	if c.CacheFile == "" {
+		return records, nil
+	}
+	cache, err := store.NewStore()
+	if err != nil {
+		log.Printf("cannot get local store: %v", err)
+		return records, err
+	}
+	return cache.ListNotes(c.UserName)
+}

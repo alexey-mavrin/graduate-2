@@ -77,3 +77,16 @@ func (c *Client) cacheGetAccount(id int64) (common.Account, error) {
 	}
 	return cache.GetAccount(c.UserName, id)
 }
+
+func (c *Client) cacheListAccounts() (common.Accounts, error) {
+	records := make(common.Accounts)
+	if c.CacheFile == "" {
+		return records, nil
+	}
+	cache, err := store.NewStore()
+	if err != nil {
+		log.Printf("cannot get local store: %v", err)
+		return records, err
+	}
+	return cache.ListAccounts(c.UserName)
+}

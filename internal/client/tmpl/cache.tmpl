@@ -77,3 +77,16 @@ func (c *Client) cacheGet{{ .RecordType }}(id int64) (common.{{ .RecordType }}, 
 	}
 	return cache.Get{{ .RecordType }}(c.UserName, id)
 }
+
+func (c *Client) cacheList{{ .RecordType }}s() (common.{{ .RecordType }}s, error) {
+	records := make(common.{{ .RecordType }}s)
+	if c.CacheFile == "" {
+		return records, nil
+	}
+	cache, err := store.NewStore()
+	if err != nil {
+		log.Printf("cannot get local store: %v", err)
+		return records, err
+	}
+	return cache.List{{ .RecordType }}s(c.UserName)
+}

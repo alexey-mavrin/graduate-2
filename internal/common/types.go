@@ -12,46 +12,35 @@ type User struct {
 
 // Account holds account data for some resource
 type Account struct {
-	Name     string `json:"name"`
 	URL      string `json:"url"`
 	UserName string `json:"user_name"`
 	Password string `json:"password"`
-	Meta     string `json:"meta"`
 }
 
 // Note holds text data
 type Note struct {
-	Name string `json:"name"`
 	Text string `json:"text"`
-	Meta string `json:"meta"`
 }
 
 // Card holds creditcard data
 type Card struct {
-	Name     string `json:"name"`
 	Holder   string `json:"holder"`
 	Number   string `json:"number"`
 	ExpMonth int    `json:"exp_month"`
 	ExpYear  int    `json:"exp_year"`
 	CVC      string `json:"cvc"`
-	Meta     string `json:"meta"`
 }
 
 // Record can hold any record that could be stored
 type Record struct {
-	Type    RecordType
-	Account *Account
-	Note    *Note
-	Card    *Card
+	Name   string     `json:"name"`
+	Type   RecordType `json:"record_type"`
+	Opaque string     `json:"opaque"`
+	Meta   string     `json:"meta"`
 }
 
 // Records can hold the map of any record that could be stored
-type Records struct {
-	Type     RecordType
-	Accounts *Accounts
-	Notes    *Notes
-	Cards    *Cards
-}
+type Records map[int64]Record
 
 // RecordType is the type of record conveyed
 type RecordType string

@@ -10,10 +10,10 @@ import (
 	"github.com/alexey-mavrin/graduate-2/internal/common"
 )
 
-// ListRecords lists account for the current user
-func (c *Client) listRecords(t common.RecordType) (common.Records, error) {
+// ListRecordsType lists account for the current user
+func (c *Client) ListRecordsType(t common.RecordType) (common.Records, error) {
 	var records common.Records
-	path := fmt.Sprintf("/records/%s", t)
+	path := fmt.Sprintf("/records/by_type/%s", t)
 	req, err := c.prepaReq(http.MethodGet, path, nil)
 	if err != nil {
 		return records, err
@@ -23,22 +23,8 @@ func (c *Client) listRecords(t common.RecordType) (common.Records, error) {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("cannot contact the server: %v, trying local cache", err)
-		switch t {
-		case common.AccountRecord:
-			accounts, err := c.cacheListAccounts()
-			records.Accounts = &accounts
-			return records, err
-		case common.NoteRecord:
-			notes, err := c.cacheListNotes()
-			records.Notes = &notes
-			return records, err
-		case common.CardRecord:
-			cards, err := c.cacheListCards()
-			records.Cards = &cards
-			return records, err
-		default:
-			return records, fmt.Errorf("unknown record type %s", t)
-		}
+		records, err := c.cacheListRecordsType(t)
+		return records, err
 	}
 	defer resp.Body.Close()
 
@@ -55,33 +41,16 @@ func (c *Client) listRecords(t common.RecordType) (common.Records, error) {
 		return records, err
 	}
 
-	var parseErr error
-	records.Type = t
-	switch t {
-	case common.AccountRecord:
-		accounts := make(common.Accounts)
-		parseErr = json.Unmarshal(respBody, &accounts)
-		records.Accounts = &accounts
-	case common.NoteRecord:
-		notes := make(common.Notes)
-		parseErr = json.Unmarshal(respBody, &notes)
-		records.Notes = &notes
-	case common.CardRecord:
-		cards := make(common.Cards)
-		parseErr = json.Unmarshal(respBody, &cards)
-		records.Cards = &cards
-	default:
-		return records, fmt.Errorf("unknown record type %s", t)
-	}
-	if parseErr != nil {
-		return records, parseErr
+	err = json.Unmarshal(respBody, &records)
+	if err != nil {
+		return records, err
 	}
 	return records, nil
 }
 
-// DeleteRecord returns account record with the given id
-func (c *Client) deleteRecord(id int64, t common.RecordType) error {
-	path := fmt.Sprintf("/records/%s/%d", t, id)
+// DeleteRecordID returns account record with the given id
+func (c *Client) DeleteRecordID(id int64) error {
+	path := fmt.Sprintf("/records/%d", id)
 	req, err := c.prepaReq(http.MethodDelete, path, nil)
 	if err != nil {
 		return err
@@ -106,8 +75,8 @@ func (c *Client) deleteRecord(id int64, t common.RecordType) error {
 
 	if resp.StatusCode != http.StatusOK {
 		err = fmt.Errorf(
-			"delete %s: http status %d: %s",
-			t, resp.StatusCode, status.Status,
+			"delete record %d: http status %d: %s",
+			id, resp.StatusCode, status.Status,
 		)
 		return err
 	}
@@ -115,11 +84,11 @@ func (c *Client) deleteRecord(id int64, t common.RecordType) error {
 	return nil
 }
 
-// getRecord returns account record with the given id
-func (c *Client) getRecord(id int64, t common.RecordType) (common.Record, error) {
+// GetRecordID returns account record with the given id
+func (c *Client) GetRecordID(id int64) (common.Record, error) {
 	var record common.Record
 
-	path := fmt.Sprintf("/records/%s/%d", t, id)
+	path := fmt.Sprintf("/records/%d", id)
 	req, err := c.prepaReq(http.MethodGet, path, nil)
 	if err != nil {
 		return record, err
@@ -127,25 +96,10 @@ func (c *Client) getRecord(id int64, t common.RecordType) (common.Record, error)
 
 	client := c.httpClient()
 	resp, err := client.Do(req)
-	record.Type = t
 	if err != nil {
 		log.Printf("cannot contact the server: %v, trying local cache", err)
-		switch t {
-		case common.AccountRecord:
-			account, err := c.cacheGetAccount(id)
-			record.Account = &account
-			return record, err
-		case common.NoteRecord:
-			note, err := c.cacheGetNote(id)
-			record.Note = &note
-			return record, err
-		case common.CardRecord:
-			card, err := c.cacheGetCard(id)
-			record.Card = &card
-			return record, err
-		default:
-			return record, fmt.Errorf("unknown record type %s", t)
-		}
+		record, err := c.cacheGetRecordID(id)
+		return record, err
 	}
 	defer resp.Body.Close()
 
@@ -162,66 +116,27 @@ func (c *Client) getRecord(id int64, t common.RecordType) (common.Record, error)
 		return record, err
 	}
 
-	var parseErr, cacheErr error
-	switch t {
-	case common.AccountRecord:
-		var account common.Account
-		parseErr = json.Unmarshal(respBody, &account)
-		if parseErr != nil {
-			break
-		}
-		record.Account = &account
-		cacheErr = c.cacheAccount(id, account)
-	case common.NoteRecord:
-		var note common.Note
-		parseErr = json.Unmarshal(respBody, &note)
-		if parseErr != nil {
-			break
-		}
-		record.Note = &note
-		cacheErr = c.cacheNote(id, note)
-	case common.CardRecord:
-		var card common.Card
-		parseErr = json.Unmarshal(respBody, &card)
-		if parseErr != nil {
-			break
-		}
-		record.Card = &card
-		cacheErr = c.cacheCard(id, card)
-	default:
-		parseErr = fmt.Errorf("unknown type: %s", t)
-		cacheErr = fmt.Errorf("unknown type: %s", t)
+	err = json.Unmarshal(respBody, &record)
+	if err != nil {
+		return record, err
 	}
-	if parseErr != nil {
-		return record, parseErr
-	}
+	err = c.cacheRecordID(id, record)
 
-	if cacheErr != nil {
+	if err != nil {
 		log.Printf("cache record: %v", err)
 	}
 
 	return record, nil
 }
 
-// updateRecord updates account record with the given id
-func (c *Client) updateRecord(id int64, record common.Record) error {
-	body := make([]byte, 0)
-	var encodeErr error
-	switch record.Type {
-	case common.AccountRecord:
-		body, encodeErr = json.Marshal(*record.Account)
-	case common.NoteRecord:
-		body, encodeErr = json.Marshal(*record.Note)
-	case common.CardRecord:
-		body, encodeErr = json.Marshal(*record.Card)
-	default:
-		encodeErr = fmt.Errorf("unknown record type %s", record.Type)
-	}
-	if encodeErr != nil {
-		return encodeErr
+// UpdateRecordID updates account record with the given id
+func (c *Client) UpdateRecordID(id int64, record common.Record) error {
+	body, err := json.Marshal(record)
+	if err != nil {
+		return err
 	}
 
-	path := fmt.Sprintf("/records/%s/%d", record.Type, id)
+	path := fmt.Sprintf("/records/%d", id)
 	req, err := c.prepaReq(http.MethodPut, path, body)
 	if err != nil {
 		return err
@@ -252,44 +167,22 @@ func (c *Client) updateRecord(id int64, record common.Record) error {
 		return err
 	}
 
-	var cacheErr error
-	switch record.Type {
-	case common.AccountRecord:
-		cacheErr = c.cacheAccount(id, *record.Account)
-	case common.NoteRecord:
-		cacheErr = c.cacheNote(id, *record.Note)
-	case common.CardRecord:
-		cacheErr = c.cacheCard(id, *record.Card)
-	default:
-		cacheErr = fmt.Errorf("unknown record type: %s", record.Type)
-	}
-
-	if cacheErr != nil {
-		log.Printf("cache %s: %v", record.Type, cacheErr)
+	err = c.cacheRecordID(id, record)
+	if err != nil {
+		log.Printf("cache %s: %v", record.Type, err)
 	}
 
 	return nil
 }
 
-// storeRecord stores account record
-func (c *Client) storeRecord(record common.Record) (int64, error) {
-	body := make([]byte, 0)
-	var encodeErr error
-	switch record.Type {
-	case common.AccountRecord:
-		body, encodeErr = json.Marshal(*record.Account)
-	case common.NoteRecord:
-		body, encodeErr = json.Marshal(*record.Note)
-	case common.CardRecord:
-		body, encodeErr = json.Marshal(*record.Card)
-	default:
-		encodeErr = fmt.Errorf("unknown record type %s", record.Type)
-	}
-	if encodeErr != nil {
-		return 0, encodeErr
+// StoreRecord stores account record
+func (c *Client) StoreRecord(record common.Record) (int64, error) {
+	body, err := json.Marshal(record)
+	if err != nil {
+		return 0, err
 	}
 
-	path := fmt.Sprintf("/records/%s", record.Type)
+	path := fmt.Sprintf("/records")
 	req, err := c.prepaReq(http.MethodPost, path, body)
 	if err != nil {
 		return 0, err
@@ -321,20 +214,9 @@ func (c *Client) storeRecord(record common.Record) (int64, error) {
 		return 0, err
 	}
 
-	var cacheErr error
-	switch record.Type {
-	case common.AccountRecord:
-		cacheErr = c.cacheAccount(status.ID, *record.Account)
-	case common.NoteRecord:
-		cacheErr = c.cacheNote(status.ID, *record.Note)
-	case common.CardRecord:
-		cacheErr = c.cacheCard(status.ID, *record.Card)
-	default:
-		cacheErr = fmt.Errorf("unknown record type: %s", record.Type)
-	}
-
-	if cacheErr != nil {
-		log.Printf("cache %s: %v", record.Type, cacheErr)
+	err = c.cacheRecordID(status.ID, record)
+	if err != nil {
+		log.Printf("cache %s: %v", record.Type, err)
 	}
 
 	return status.ID, nil

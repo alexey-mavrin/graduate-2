@@ -91,48 +91,14 @@ func NewStore() (*Store, error) {
 		return secretStore, err
 	}
 
-	_, err = secretStore.db.Exec(`CREATE TABLE IF NOT EXISTS accounts (
+	_, err = secretStore.db.Exec(`CREATE TABLE IF NOT EXISTS records (
 		id INTEGER PRIMARY KEY,
 		user_id INTEGER NOT NULL,
 		name TEXT NOT NULL,
-		url TEXT,
-		user_name TEXT,
-		password TEXT,
+		type TEXT NOT NULL,
+		opaque TEXT,
 		meta TEXT,
-		FOREIGN KEY (user_id)
-		  REFERENCES users (id)
-		    ON DELETE CASCADE
-		    ON UPDATE NO ACTION
-	)`)
-	if err != nil {
-		return secretStore, err
-	}
-
-	_, err = secretStore.db.Exec(`CREATE TABLE IF NOT EXISTS notes (
-		id INTEGER PRIMARY KEY,
-		user_id INTEGER NOT NULL,
-		name TEXT NOT NULL,
-		text TEXT,
-		meta TEXT,
-		FOREIGN KEY (user_id)
-		  REFERENCES users (id)
-		    ON DELETE CASCADE
-		    ON UPDATE NO ACTION
-	)`)
-	if err != nil {
-		return secretStore, err
-	}
-
-	_, err = secretStore.db.Exec(`CREATE TABLE IF NOT EXISTS cards (
-		id INTEGER PRIMARY KEY,
-		user_id INTEGER NOT NULL,
-		name TEXT NOT NULL,
-		holder TEXT,
-		number TEXT,
-		expm INT,
-		expy INT,
-		cvc TEXT,
-		meta TEXT,
+		UNIQUE(user_id,name,type),
 		FOREIGN KEY (user_id)
 		  REFERENCES users (id)
 		    ON DELETE CASCADE

@@ -16,9 +16,6 @@ import (
 //go:embed client.tmpl
 var clientTemplate string
 
-//go:embed cache.tmpl
-var cacheTemplate string
-
 type clientTParams struct {
 	RecordType common.RecordType
 }
@@ -58,15 +55,6 @@ func main() {
 		log.Fatal(err)
 	}
 	err = os.WriteFile(string(recordType)+"_client.go", p, 0644)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	p, err = generateCode(cacheTemplate, recordType)
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = os.WriteFile(string(recordType)+"_cache.go", p, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}

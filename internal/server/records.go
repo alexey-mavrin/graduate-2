@@ -14,6 +14,45 @@ import (
 )
 
 func listRecords(w http.ResponseWriter, r *http.Request) {
+	log.Print("listRecords")
+
+	user, _, ok := r.BasicAuth()
+	if !ok {
+		writeStatus(w, http.StatusBadRequest, "no basic auth")
+		return
+	}
+
+	s, err := store.NewStore()
+	if err != nil {
+		log.Print(err)
+		writeStatus(w,
+			http.StatusInternalServerError,
+			"Internal Server Error",
+		)
+		return
+	}
+
+	records, err := s.ListRecords(user)
+	if err != nil {
+		log.Print(err)
+		writeStatus(w,
+			http.StatusInternalServerError,
+			"Internal Server Error",
+		)
+		return
+	}
+	err = json.NewEncoder(w).Encode(records)
+	if err != nil {
+		log.Print(err)
+		writeStatus(w,
+			http.StatusInternalServerError,
+			"Internal Server Error",
+		)
+		return
+	}
+}
+
+func listRecordsType(w http.ResponseWriter, r *http.Request) {
 	recordType := common.RecordType(chi.URLParam(r, "record_type"))
 	log.Print("listRecords " + recordType)
 
@@ -33,70 +72,7 @@ func listRecords(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var listErr, encodeErr error
-	switch recordType {
-	case common.AccountRecord:
-		var accs common.Accounts
-		accs, listErr = s.ListAccounts(user)
-		if listErr != nil {
-			break
-		}
-		encodeErr = json.NewEncoder(w).Encode(accs)
-	case common.NoteRecord:
-		var notes common.Notes
-		notes, listErr = s.ListNotes(user)
-		if listErr != nil {
-			break
-		}
-		encodeErr = json.NewEncoder(w).Encode(notes)
-	case common.CardRecord:
-		var cards common.Cards
-		cards, listErr = s.ListCards(user)
-		if listErr != nil {
-			break
-		}
-		encodeErr = json.NewEncoder(w).Encode(cards)
-	default:
-		msg := "unknown record type requested"
-		log.Print(msg)
-		writeStatus(w, http.StatusBadRequest, msg)
-		return
-	}
-	if listErr != nil {
-		log.Print(listErr)
-		writeStatus(w,
-			http.StatusInternalServerError,
-			"Internal Server Error",
-		)
-		return
-	}
-	if encodeErr != nil {
-		log.Print(encodeErr)
-		writeStatus(w,
-			http.StatusInternalServerError,
-			"Internal Server Error",
-		)
-		return
-	}
-}
-
-func getRecord(w http.ResponseWriter, r *http.Request) {
-	log.Print("getRecord")
-
-	user, _, ok := r.BasicAuth()
-	if !ok {
-		writeStatus(w, http.StatusBadRequest, "no basic auth")
-		return
-	}
-
-	recordType := common.RecordType(chi.URLParam(r, "record_type"))
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
-	if err != nil {
-		writeStatus(w, http.StatusBadRequest, "cannot parse 'id' param")
-		return
-	}
-
-	s, err := store.NewStore()
+	records, err := s.ListRecordsType(user, recordType)
 	if err != nil {
 		log.Print(err)
 		writeStatus(w,
@@ -105,55 +81,9 @@ func getRecord(w http.ResponseWriter, r *http.Request) {
 		)
 		return
 	}
-
-	var getErr, encodeErr error
-	switch recordType {
-	case common.AccountRecord:
-		var acc common.Account
-		acc, getErr = s.GetAccount(user, int64(id))
-		if getErr != nil {
-			break
-		}
-		encodeErr = json.NewEncoder(w).Encode(acc)
-	case common.NoteRecord:
-		var note common.Note
-		note, getErr = s.GetNote(user, int64(id))
-		if getErr != nil {
-			break
-		}
-		encodeErr = json.NewEncoder(w).Encode(note)
-	case common.CardRecord:
-		var card common.Card
-		card, getErr = s.GetCard(user, int64(id))
-		if getErr != nil {
-			break
-		}
-		encodeErr = json.NewEncoder(w).Encode(card)
-	default:
-		msg := "unknown record type requested"
-		log.Print(msg)
-		writeStatus(w,
-			http.StatusBadRequest,
-			msg,
-		)
-		return
-	}
-	if getErr == store.ErrNotFound {
-		msg := "Record not found"
-		log.Print(msg)
-		writeStatus(w, http.StatusNotFound, msg)
-		return
-	}
-	if getErr != nil {
+	err = json.NewEncoder(w).Encode(records)
+	if err != nil {
 		log.Print(err)
-		writeStatus(w,
-			http.StatusInternalServerError,
-			"Internal Server Error",
-		)
-		return
-	}
-	if encodeErr != nil {
-		log.Print(encodeErr)
 		writeStatus(w,
 			http.StatusInternalServerError,
 			"Internal Server Error",
@@ -162,9 +92,8 @@ func getRecord(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func deleteRecord(w http.ResponseWriter, r *http.Request) {
-	recordType := common.RecordType(chi.URLParam(r, "record_type"))
-	log.Print("deleteRecords " + recordType)
+func getRecordID(w http.ResponseWriter, r *http.Request) {
+	log.Print("getRecordID")
 
 	user, _, ok := r.BasicAuth()
 	if !ok {
@@ -188,30 +117,158 @@ func deleteRecord(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var deleteErr error
-	switch recordType {
-	case common.AccountRecord:
-		deleteErr = s.DeleteAccount(user, int64(id))
-	case common.NoteRecord:
-		deleteErr = s.DeleteNote(user, int64(id))
-	case common.CardRecord:
-		deleteErr = s.DeleteCard(user, int64(id))
-	default:
-		msg := "unknown record type requested"
-		log.Print(msg)
-		writeStatus(w,
-			http.StatusBadRequest,
-			msg,
-		)
-		return
-	}
-	if deleteErr == store.ErrNotFound {
-		msg := "Record not found"
+	record, err := s.GetRecordID(user, int64(id))
+	if err == store.ErrNotFound {
+		msg := fmt.Sprintf("Record id %d not found", id)
 		log.Print(msg)
 		writeStatus(w, http.StatusNotFound, msg)
 		return
 	}
-	if deleteErr != nil {
+	if err != nil {
+		log.Print(err)
+		writeStatus(w,
+			http.StatusInternalServerError,
+			"Internal Server Error",
+		)
+		return
+	}
+	err = json.NewEncoder(w).Encode(record)
+
+	if err != nil {
+		log.Print(err)
+		writeStatus(w,
+			http.StatusInternalServerError,
+			"Internal Server Error",
+		)
+		return
+	}
+}
+
+func getRecordTypeName(w http.ResponseWriter, r *http.Request) {
+	log.Print("getRecordTypeName")
+
+	user, _, ok := r.BasicAuth()
+	if !ok {
+		writeStatus(w, http.StatusBadRequest, "no basic auth")
+		return
+	}
+
+	recordType := common.RecordType(chi.URLParam(r, "record_type"))
+	recordName := chi.URLParam(r, "record_name")
+
+	s, err := store.NewStore()
+	if err != nil {
+		log.Print(err)
+		writeStatus(w,
+			http.StatusInternalServerError,
+			"Internal Server Error",
+		)
+		return
+	}
+
+	record, err := s.GetRecordTypeName(user, recordType, recordName)
+	if err == store.ErrNotFound {
+		msg := fmt.Sprintf("Record %s of type %s not found",
+			recordName, recordType)
+		log.Print(msg)
+		writeStatus(w, http.StatusNotFound, msg)
+		return
+	}
+	if err != nil {
+		log.Print(err)
+		writeStatus(w,
+			http.StatusInternalServerError,
+			"Internal Server Error",
+		)
+		return
+	}
+	err = json.NewEncoder(w).Encode(record)
+
+	if err != nil {
+		log.Print(err)
+		writeStatus(w,
+			http.StatusInternalServerError,
+			"Internal Server Error",
+		)
+		return
+	}
+}
+
+func deleteRecordID(w http.ResponseWriter, r *http.Request) {
+	log.Print("deleteRecordID")
+
+	user, _, ok := r.BasicAuth()
+	if !ok {
+		writeStatus(w, http.StatusBadRequest, "no basic auth")
+		return
+	}
+
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		writeStatus(w, http.StatusBadRequest, "cannot parse 'id' param")
+		return
+	}
+
+	s, err := store.NewStore()
+	if err != nil {
+		log.Print(err)
+		writeStatus(w,
+			http.StatusInternalServerError,
+			"Internal Server Error",
+		)
+		return
+	}
+
+	err = s.DeleteRecordID(user, int64(id))
+	if err == store.ErrNotFound {
+		msg := fmt.Sprintf("Record id %d not found", id)
+		log.Print(msg)
+		writeStatus(w, http.StatusNotFound, msg)
+		return
+	}
+	if err != nil {
+		log.Print(err)
+		writeStatus(w,
+			http.StatusInternalServerError,
+			"Internal Server Error",
+		)
+		return
+	}
+
+	writeStatus(w, http.StatusOK, "OK")
+}
+
+func deleteRecordTypeName(w http.ResponseWriter, r *http.Request) {
+	log.Print("deleteRecordTypeName")
+
+	user, _, ok := r.BasicAuth()
+	if !ok {
+		writeStatus(w, http.StatusBadRequest, "no basic auth")
+		return
+	}
+
+	recordType := common.RecordType(chi.URLParam(r, "record_type"))
+	recordName := chi.URLParam(r, "record_name")
+
+	s, err := store.NewStore()
+	if err != nil {
+		log.Print(err)
+		writeStatus(w,
+			http.StatusInternalServerError,
+			"Internal Server Error",
+		)
+		return
+	}
+
+	err = s.DeleteRecordTypeName(user, recordType, recordName)
+	if err == store.ErrNotFound {
+		msg := fmt.Sprintf("Record %s of type %s not found",
+			recordName, recordType)
+		log.Print(msg)
+		writeStatus(w, http.StatusNotFound, msg)
+		return
+	}
+	if err != nil {
 		log.Print(err)
 		writeStatus(w,
 			http.StatusInternalServerError,
@@ -224,8 +281,7 @@ func deleteRecord(w http.ResponseWriter, r *http.Request) {
 }
 
 func storeRecord(w http.ResponseWriter, r *http.Request) {
-	recordType := common.RecordType(chi.URLParam(r, "record_type"))
-	log.Print("storeRecord " + recordType)
+	log.Print("storeRecord")
 
 	user, _, ok := r.BasicAuth()
 	if !ok {
@@ -255,65 +311,31 @@ func storeRecord(w http.ResponseWriter, r *http.Request) {
 
 	var resp common.StoreRecordResponse
 	resp.Status = "OK"
-	var storeErr error
-	switch recordType {
-	case common.AccountRecord:
-		var account common.Account
-		err = json.Unmarshal(body, &account)
-		if err != nil {
-			writeStatus(w,
-				http.StatusBadRequest,
-				fmt.Sprintf("Cannot Parse Body: %v", err),
-			)
-			return
-		}
-		resp.Name = account.Name
-		resp.ID, storeErr = s.StoreAccount(user, account)
-	case common.NoteRecord:
-		var note common.Note
-		err = json.Unmarshal(body, &note)
-		if err != nil {
-			writeStatus(w,
-				http.StatusBadRequest,
-				fmt.Sprintf("Cannot Parse Body: %v", err),
-			)
-			return
-		}
-		resp.Name = note.Name
-		resp.ID, storeErr = s.StoreNote(user, note)
-	case common.CardRecord:
-		var card common.Card
-		err = json.Unmarshal(body, &card)
-		if err != nil {
-			writeStatus(w,
-				http.StatusBadRequest,
-				fmt.Sprintf("Cannot Parse Body: %v", err),
-			)
-			return
-		}
-		resp.Name = card.Name
-		resp.ID, storeErr = s.StoreCard(user, card)
-	default:
-		msg := "unknown record type requested"
-		log.Print(msg)
+
+	var record common.Record
+	err = json.Unmarshal(body, &record)
+	if err != nil {
 		writeStatus(w,
 			http.StatusBadRequest,
-			msg,
+			fmt.Sprintf("Cannot Parse Body: %v", err),
 		)
 		return
 	}
+	resp.Name = record.Name
+	resp.ID, err = s.StoreRecord(user, record)
 
-	if storeErr != nil {
-		log.Printf("storeAccount() error: %v", err)
+	if err != nil {
+		log.Printf("storeRecord() error: %v", err)
 		resp.Status = "error"
 		writeStatus(w,
 			http.StatusInternalServerError,
-			fmt.Sprintf("Cannot Store Account: %v", err),
+			fmt.Sprintf("Cannot Store Record: %v", err),
 		)
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(resp); err != nil {
+	err = json.NewEncoder(w).Encode(resp)
+	if err != nil {
 		writeStatus(w,
 			http.StatusInternalServerError,
 			"Internal Server Error",
@@ -322,9 +344,8 @@ func storeRecord(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func updateRecord(w http.ResponseWriter, r *http.Request) {
-	recordType := common.RecordType(chi.URLParam(r, "record_type"))
-	log.Print("updateRecord " + recordType)
+func updateRecordID(w http.ResponseWriter, r *http.Request) {
+	log.Print("updateRecordID")
 
 	user, _, ok := r.BasicAuth()
 	if !ok {
@@ -360,65 +381,96 @@ func updateRecord(w http.ResponseWriter, r *http.Request) {
 
 	var resp common.StoreRecordResponse
 	resp.Status = "OK"
-	var updateErr error
-	switch recordType {
-	case common.AccountRecord:
-		var account common.Account
-		err = json.Unmarshal(body, &account)
-		if err != nil {
-			writeStatus(w,
-				http.StatusBadRequest,
-				fmt.Sprintf("Cannot Parse Body: %v", err),
-			)
-			return
-		}
-		resp.Name = account.Name
-		updateErr = s.UpdateAccount(user, int64(id), account)
-	case common.NoteRecord:
-		var note common.Note
-		err = json.Unmarshal(body, &note)
-		if err != nil {
-			writeStatus(w,
-				http.StatusBadRequest,
-				fmt.Sprintf("Cannot Parse Body: %v", err),
-			)
-			return
-		}
-		resp.Name = note.Name
-		updateErr = s.UpdateNote(user, int64(id), note)
-	case common.CardRecord:
-		var card common.Card
-		err = json.Unmarshal(body, &card)
-		if err != nil {
-			writeStatus(w,
-				http.StatusBadRequest,
-				fmt.Sprintf("Cannot Parse Body: %v", err),
-			)
-			return
-		}
-		resp.Name = card.Name
-		updateErr = s.UpdateCard(user, int64(id), card)
-	default:
-		msg := "unknown record type requested"
-		log.Print(msg)
+	var record common.Record
+	err = json.Unmarshal(body, &record)
+	if err != nil {
 		writeStatus(w,
 			http.StatusBadRequest,
-			msg,
+			fmt.Sprintf("Cannot Parse Body: %v", err),
 		)
 		return
 	}
+	resp.Name = record.Name
+	err = s.UpdateRecordID(user, int64(id), record)
 
-	if updateErr != nil {
-		log.Printf("updateAccount() error: %v", err)
+	if err != nil {
+		log.Printf("update record error: %v", err)
 		resp.Status = "error"
 		writeStatus(w,
 			http.StatusInternalServerError,
-			fmt.Sprintf("Cannot Update Account: %v", err),
+			fmt.Sprintf("Cannot Update Record: %v", err),
 		)
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(resp); err != nil {
+	err = json.NewEncoder(w).Encode(resp)
+	if err != nil {
+		writeStatus(w,
+			http.StatusInternalServerError,
+			"Internal Server Error",
+		)
+		return
+	}
+}
+
+func updateRecordTypeName(w http.ResponseWriter, r *http.Request) {
+	log.Print("updateRecordTypeName")
+
+	user, _, ok := r.BasicAuth()
+	if !ok {
+		writeStatus(w, http.StatusBadRequest, "no basic auth")
+		return
+	}
+
+	recordType := common.RecordType(chi.URLParam(r, "record_type"))
+	recordName := chi.URLParam(r, "record_name")
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Print(err)
+		writeStatus(w,
+			http.StatusInternalServerError,
+			"Internal Server Error",
+		)
+		return
+	}
+
+	s, err := store.NewStore()
+	if err != nil {
+		log.Print(err)
+		writeStatus(w,
+			http.StatusInternalServerError,
+			"Internal Server Error",
+		)
+		return
+	}
+
+	var resp common.StoreRecordResponse
+	resp.Status = "OK"
+	var record common.Record
+	err = json.Unmarshal(body, &record)
+	if err != nil {
+		writeStatus(w,
+			http.StatusBadRequest,
+			fmt.Sprintf("Cannot Parse Body: %v", err),
+		)
+		return
+	}
+	resp.Name = record.Name
+	err = s.UpdateRecordTypeName(user, recordType, recordName, record)
+
+	if err != nil {
+		log.Printf("update record error: %v", err)
+		resp.Status = "error"
+		writeStatus(w,
+			http.StatusInternalServerError,
+			fmt.Sprintf("Cannot Update Record: %v", err),
+		)
+		return
+	}
+
+	err = json.NewEncoder(w).Encode(resp)
+	if err != nil {
 		writeStatus(w,
 			http.StatusInternalServerError,
 			"Internal Server Error",

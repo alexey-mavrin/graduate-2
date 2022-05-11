@@ -7,34 +7,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_cryptAccount(t *testing.T) {
+func Test_cryptRecord(t *testing.T) {
 	key := MakeKey("qwerty")
-	acc := common.Account{
-		Name:     "name",
-		UserName: "user_name",
-		Password: "pass1",
-		URL:      "http://localhost",
-		Meta:     "yo-ho-ho",
+	record := common.Record{
+		Name:   "name",
+		Type:   common.NoteRecord,
+		Opaque: "1111",
+		Meta:   "yo-ho-ho",
 	}
-	eAcc, err := EncryptAccount(key, acc)
+	eRecord, err := EncryptRecord(key, record)
 	assert.NoError(t, err)
-	assert.NotEqual(t, eAcc, acc)
-	decr, err := DecryptAccount(key, eAcc)
+	assert.NotEqual(t, eRecord, record)
+	decr, err := DecryptRecord(key, eRecord)
 	assert.NoError(t, err)
-	assert.Equal(t, acc, decr)
-}
-
-func Test_cryptNote(t *testing.T) {
-	key := MakeKey("qwerty")
-	acc := common.Note{
-		Name: "name",
-		Text: "some text",
-		Meta: "yo-ho-ho",
-	}
-	eAcc, err := EncryptNote(key, acc)
-	assert.NoError(t, err)
-	assert.NotEqual(t, eAcc, acc)
-	decr, err := DecryptNote(key, eAcc)
-	assert.NoError(t, err)
-	assert.Equal(t, acc, decr)
+	assert.Equal(t, record, decr)
 }

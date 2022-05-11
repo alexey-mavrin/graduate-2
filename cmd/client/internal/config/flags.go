@@ -46,15 +46,16 @@ const (
 
 // Operation describes the current operation type
 type Operation struct {
-	Op        OpType
-	Subop     OpSubtype
-	User      common.User
-	Account   common.Account
-	AccountID int64
-	Note      common.Note
-	NoteID    int64
-	Card      common.Card
-	CardID    int64
+	Op         OpType
+	Subop      OpSubtype
+	User       common.User
+	Account    common.Account
+	Note       common.Note
+	Card       common.Card
+	RecordID   int64
+	RecordName string
+	RecordMeta string
+	RecordType common.RecordType
 }
 
 // Op describes the current operation
@@ -131,6 +132,7 @@ func ParseFlags() error {
 		}
 	} else if accFlags.Parsed() {
 		Op.Op = OpTypeAccount
+		Op.RecordType = common.AccountRecord
 		switch *accAction {
 		case "store":
 			Op.Subop = OpSubtypeRecordStore
@@ -144,14 +146,15 @@ func ParseFlags() error {
 			Op.Subop = OpSubtypeRecordDelete
 		}
 
-		Op.Account.Name = *accName
+		Op.RecordName = *accName
 		Op.Account.UserName = *accUserName
 		Op.Account.Password = *accPassword
 		Op.Account.URL = *accURL
-		Op.Account.Meta = *accMeta
-		Op.AccountID = *accID
+		Op.RecordMeta = *accMeta
+		Op.RecordID = *accID
 	} else if noteFlags.Parsed() {
 		Op.Op = OpTypeNote
+		Op.RecordType = common.NoteRecord
 		switch *noteAction {
 		case "store":
 			Op.Subop = OpSubtypeRecordStore
@@ -165,12 +168,13 @@ func ParseFlags() error {
 			Op.Subop = OpSubtypeRecordDelete
 		}
 
-		Op.Note.Name = *noteName
+		Op.RecordName = *noteName
 		Op.Note.Text = *noteText
-		Op.Note.Meta = *noteMeta
-		Op.NoteID = *noteID
+		Op.RecordMeta = *noteMeta
+		Op.RecordID = *noteID
 	} else if cardFlags.Parsed() {
 		Op.Op = OpTypeCard
+		Op.RecordType = common.CardRecord
 		switch *cardAction {
 		case "store":
 			Op.Subop = OpSubtypeRecordStore
@@ -184,14 +188,14 @@ func ParseFlags() error {
 			Op.Subop = OpSubtypeRecordDelete
 		}
 
-		Op.Card.Name = *cardName
+		Op.RecordName = *cardName
 		Op.Card.Holder = *cardHolder
 		Op.Card.Number = *cardNumber
 		Op.Card.ExpMonth = *cardExpMonth
 		Op.Card.ExpYear = *cardExpYear
 		Op.Card.CVC = *cardCVC
-		Op.Card.Meta = *cardMeta
-		Op.CardID = *cardID
+		Op.RecordMeta = *cardMeta
+		Op.RecordID = *cardID
 	}
 
 	return nil

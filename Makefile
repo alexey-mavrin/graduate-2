@@ -11,3 +11,6 @@ key:
 	openssl x509 -req -days 365 -in keys/server.csr \
 		-signkey keys/server.key -out keys/server.crt \
 		-extfile keys/self-signed-cert.ext
+
+db_clean:
+	rm *.db

@@ -96,11 +96,15 @@ func NewRouter() chi.Router {
 
 	r.Post("/users", createUser)
 	r.Get("/ping", pingHandler)
-	r.Post("/records/{record_type}", storeRecord)
-	r.Get("/records/{record_type}", listRecords)
-	r.Get("/records/{record_type}/{id}", getRecord)
-	r.Put("/records/{record_type}/{id}", updateRecord)
-	r.Delete("/records/{record_type}/{id}", deleteRecord)
+	r.Post("/records", storeRecord)
+	r.Get("/records", listRecords)
+	r.Get("/records/by_type/{record_type}", listRecordsType)
+	r.Get("/records/{id}", getRecordID)
+	r.Get("/records/{record_type}/{record_name}", getRecordTypeName)
+	r.Put("/records/{id}", updateRecordID)
+	r.Put("/records/{record_type}/{record_name}", updateRecordTypeName)
+	r.Delete("/records/{id}", deleteRecordID)
+	r.Delete("/records/{record_type}/{record_name}", deleteRecordTypeName)
 
 	return r
 }

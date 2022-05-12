@@ -139,7 +139,7 @@ var _ = Describe("Run server and client together", func() {
 			Expect(err).NotTo(HaveOccurred(), "Client should register")
 
 			stdOut, stdErr, err := runClient(
-				"card -a store -num 1111222233334444, -c 123",
+				"card -a store -n c1 -num 1111222233334444, -c 123",
 			)
 			fmt.Print(stdOut, stdErr)
 			Expect(err).NotTo(HaveOccurred(), "Client should run OK")

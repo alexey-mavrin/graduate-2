@@ -1,3 +1,5 @@
+ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+
 client:
 	go build -o client cmd/client/main.go
 
@@ -13,4 +15,11 @@ key:
 		-extfile keys/self-signed-cert.ext
 
 db_clean:
-	rm *.db
+	@rm -f $(ROOT_DIR)/cache_store.db
+	@rm -f $(ROOT_DIR)/server_storage.db
+	@rm -f $(ROOT_DIR)/internal/store/secret_storage.db
+	@rm -f $(ROOT_DIR)/internal/server/secret_storage.db
+	@rm -f $(ROOT_DIR)/server_storage.db
+	@rm -f $(ROOT_DIR)/cache_store.db
+	@rm -f $(ROOT_DIR)/tests/cache_inttest_store.db
+	@rm -f $(ROOT_DIR)/tests/server_inttest_storage.db

@@ -11,8 +11,9 @@
 
 # binaries
 main
-client
-server
+bin/client
+bin/server
+tests/server
 
 # Test binary, built with `go test -c`
 *.test

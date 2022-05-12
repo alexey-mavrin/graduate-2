@@ -34,14 +34,14 @@ const (
 
 	// OpSubtypeRecordStore is the account record creation
 	OpSubtypeRecordStore
-	// OpSubtypeRecordGet is the account regord retrieval
-	OpSubtypeRecordGet
-	// OpSubtypeRecordList is the listing of account records
-	OpSubtypeRecordList
-	// OpSubtypeRecordUpdate is the account record update
-	OpSubtypeRecordUpdate
-	// OpSubtypeRecordDelete is the removal of the account record
-	OpSubtypeRecordDelete
+	// OpSubtypeRecordGetID is the account regord retrieval
+	OpSubtypeRecordGetID
+	// OpSubtypeRecordListType is the listing of account records
+	OpSubtypeRecordListType
+	// OpSubtypeRecordUpdateID is the account record update
+	OpSubtypeRecordUpdateID
+	// OpSubtypeRecordDeleteID is the removal of the account record
+	OpSubtypeRecordDeleteID
 )
 
 // Operation describes the current operation type
@@ -137,13 +137,13 @@ func ParseFlags() error {
 		case "store":
 			Op.Subop = OpSubtypeRecordStore
 		case "get":
-			Op.Subop = OpSubtypeRecordGet
+			Op.Subop = OpSubtypeRecordGetID
 		case "list":
-			Op.Subop = OpSubtypeRecordList
+			Op.Subop = OpSubtypeRecordListType
 		case "update":
-			Op.Subop = OpSubtypeRecordUpdate
+			Op.Subop = OpSubtypeRecordUpdateID
 		case "delete":
-			Op.Subop = OpSubtypeRecordDelete
+			Op.Subop = OpSubtypeRecordDeleteID
 		}
 
 		Op.RecordName = *accName
@@ -159,13 +159,13 @@ func ParseFlags() error {
 		case "store":
 			Op.Subop = OpSubtypeRecordStore
 		case "get":
-			Op.Subop = OpSubtypeRecordGet
+			Op.Subop = OpSubtypeRecordGetID
 		case "list":
-			Op.Subop = OpSubtypeRecordList
+			Op.Subop = OpSubtypeRecordListType
 		case "update":
-			Op.Subop = OpSubtypeRecordUpdate
+			Op.Subop = OpSubtypeRecordUpdateID
 		case "delete":
-			Op.Subop = OpSubtypeRecordDelete
+			Op.Subop = OpSubtypeRecordDeleteID
 		}
 
 		Op.RecordName = *noteName
@@ -179,13 +179,13 @@ func ParseFlags() error {
 		case "store":
 			Op.Subop = OpSubtypeRecordStore
 		case "get":
-			Op.Subop = OpSubtypeRecordGet
+			Op.Subop = OpSubtypeRecordGetID
 		case "list":
-			Op.Subop = OpSubtypeRecordList
+			Op.Subop = OpSubtypeRecordListType
 		case "update":
-			Op.Subop = OpSubtypeRecordUpdate
+			Op.Subop = OpSubtypeRecordUpdateID
 		case "delete":
-			Op.Subop = OpSubtypeRecordDelete
+			Op.Subop = OpSubtypeRecordDeleteID
 		}
 
 		Op.RecordName = *cardName

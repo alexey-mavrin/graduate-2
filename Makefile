@@ -1,10 +1,12 @@
 ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
 client:
-	go build -o client cmd/client/main.go
+	mkdir -p bin
+	go build -o bin/client cmd/client/main.go
 
 server:
-	go build -o server cmd/server/main.go
+	mkdir -p bin
+	go build -o bin/server cmd/server/main.go
 
 key:
 	openssl req -new -subj "/C=RU/ST=SPb/CN=localhost" \

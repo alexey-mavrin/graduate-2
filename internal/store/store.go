@@ -94,7 +94,7 @@ func NewStore() (*Store, error) {
 	_, err = secretStore.db.Exec(`CREATE TABLE IF NOT EXISTS records (
 		id INTEGER PRIMARY KEY,
 		user_id INTEGER NOT NULL,
-		name TEXT NOT NULL,
+		name TEXT NOT NULL CHECK (length(name) >= 1),
 		type TEXT NOT NULL,
 		opaque TEXT,
 		meta TEXT,

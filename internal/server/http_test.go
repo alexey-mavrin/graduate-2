@@ -11,7 +11,7 @@ import (
 )
 
 func testHTTPRequest(t *testing.T,
-	ts *httptest.Server,
+	router http.Handler,
 	method string,
 	path string,
 	body string,
@@ -19,17 +19,17 @@ func testHTTPRequest(t *testing.T,
 	pass string,
 ) (*http.Response, string) {
 	bodyReader := strings.NewReader(body)
-	req, err := http.NewRequest(method, ts.URL+path, bodyReader)
-	require.NoError(t, err)
+	req := httptest.NewRequest(method, path, bodyReader)
 
 	req.Header.Add("Content-Type", "application/json")
 	if user != "" && pass != "" {
 		req.SetBasicAuth(user, pass)
 	}
 
-	resp, err := http.DefaultClient.Do(req)
-	require.NoError(t, err)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
 
+	resp := w.Result()
 	respBody, err := ioutil.ReadAll(resp.Body)
 	require.NoError(t, err)
 

@@ -3,7 +3,6 @@ package server
 import (
 	"encoding/json"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/alexey-mavrin/graduate-2/internal/common"
@@ -56,13 +55,11 @@ func Test_createUser(t *testing.T) {
 
 	require.NoError(t, store.DropStore())
 	router := NewRouter()
-	ts := httptest.NewServer(router)
-	defer ts.Close()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			resp, body := testHTTPRequest(t,
-				ts,
+				router,
 				tt.method,
 				"/users",
 				tt.body,
@@ -84,11 +81,9 @@ func Test_pingHandler(t *testing.T) {
 
 	require.NoError(t, store.DropStore())
 	router := NewRouter()
-	ts := httptest.NewServer(router)
-	defer ts.Close()
 
 	resp, _ := testHTTPRequest(t,
-		ts,
+		router,
 		http.MethodPost,
 		"/users",
 		body,
@@ -100,7 +95,7 @@ func Test_pingHandler(t *testing.T) {
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	resp1, _ := testHTTPRequest(t,
-		ts,
+		router,
 		http.MethodGet,
 		"/ping",
 		"",
@@ -112,7 +107,7 @@ func Test_pingHandler(t *testing.T) {
 	assert.Equal(t, http.StatusOK, resp1.StatusCode)
 
 	resp2, _ := testHTTPRequest(t,
-		ts,
+		router,
 		http.MethodGet,
 		"/ping",
 		"",

@@ -1,9 +1,6 @@
 package action
 
-//
-
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/alexey-mavrin/graduate-2/cmd/client/internal/config"
@@ -12,7 +9,7 @@ import (
 	"github.com/alexey-mavrin/graduate-2/internal/crypt"
 )
 
-func act{{ .RecordType }}(subop config.OpSubtype, record common.{{ .RecordType }}) error {
+func actRecord(subop config.OpSubtype, subrecord common.Opaque) error {
 	clnt := client.NewClient(config.Cfg.ServerAddr,
 		config.Cfg.UserName,
 		config.Cfg.Password,
@@ -26,7 +23,7 @@ func act{{ .RecordType }}(subop config.OpSubtype, record common.{{ .RecordType }
 			Type: config.Op.RecordType,
 			Meta: config.Op.RecordMeta,
 		}
-		opaque, err := json.Marshal(config.Op.{{ .RecordType }})
+		opaque, err := subrecord.Pack()
 		if err != nil {
 			return err
 		}
@@ -63,7 +60,7 @@ func act{{ .RecordType }}(subop config.OpSubtype, record common.{{ .RecordType }
 			Type: config.Op.RecordType,
 			Meta: config.Op.RecordMeta,
 		}
-		opaque, err := json.Marshal(config.Op.{{ .RecordType }})
+		opaque, err := subrecord.Pack()
 		if err != nil {
 			return err
 		}

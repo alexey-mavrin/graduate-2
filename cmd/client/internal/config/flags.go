@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/base64"
 	"errors"
 	"flag"
 	"os"
@@ -24,6 +25,8 @@ const (
 	OpTypeNote
 	// OpTypeCard is for note operations
 	OpTypeCard
+	// OpTypeBinary is for binary operations
+	OpTypeBinary
 )
 
 const (
@@ -34,14 +37,16 @@ const (
 
 	// OpSubtypeRecordStore is the account record creation
 	OpSubtypeRecordStore
-	// OpSubtypeRecordGetID is the account regord retrieval
-	OpSubtypeRecordGetID
-	// OpSubtypeRecordListType is the listing of account records
-	OpSubtypeRecordListType
-	// OpSubtypeRecordUpdateID is the account record update
-	OpSubtypeRecordUpdateID
-	// OpSubtypeRecordDeleteID is the removal of the account record
-	OpSubtypeRecordDeleteID
+	// OpSubtypeRecordGet is the account regord retrieval
+	OpSubtypeRecordGet
+	// OpSubtypeRecordList is the listing of account records
+	OpSubtypeRecordList
+	// OpSubtypeRecordUpdate is the account record update
+	OpSubtypeRecordUpdate
+	// OpSubtypeRecordDelete is the removal of the account record
+	OpSubtypeRecordDelete
+	// OpSubtypeOther is unknown operation
+	OpSubtypeOther
 )
 
 // Operation describes the current operation type
@@ -52,14 +57,32 @@ type Operation struct {
 	Account    common.Account
 	Note       common.Note
 	Card       common.Card
+	Binary     common.Binary
 	RecordID   int64
 	RecordName string
 	RecordMeta string
 	RecordType common.RecordType
+	FileName   string
 }
 
 // Op describes the current operation
 var Op Operation
+
+func actionType(a *string) OpSubtype {
+	switch *a {
+	case "store":
+		return OpSubtypeRecordStore
+	case "get":
+		return OpSubtypeRecordGet
+	case "list":
+		return OpSubtypeRecordList
+	case "update":
+		return OpSubtypeRecordUpdate
+	case "delete":
+		return OpSubtypeRecordDelete
+	}
+	return OpSubtypeOther
+}
 
 // ParseFlags parses cmd line arguments
 func ParseFlags() error {
@@ -67,6 +90,7 @@ func ParseFlags() error {
 	accFlags := flag.NewFlagSet("acc", flag.ExitOnError)
 	noteFlags := flag.NewFlagSet("note", flag.ExitOnError)
 	cardFlags := flag.NewFlagSet("card", flag.ExitOnError)
+	binFlags := flag.NewFlagSet("bin", flag.ExitOnError)
 
 	userAction := userFlags.String("a", "verify", "action: verify|register")
 
@@ -103,6 +127,14 @@ func ParseFlags() error {
 	cardMeta := cardFlags.String("m", "", "card metainfo")
 	cardID := cardFlags.Int64("i", 0, "card ID")
 
+	binAction := binFlags.String("a",
+		"list",
+		"action: list|store|get|update|delete",
+	)
+	binName := binFlags.String("n", "", "binary record name")
+	binFile := binFlags.String("f", "", "file name")
+	binID := binFlags.Int64("i", 0, "binary record ID")
+
 	if len(os.Args) < 2 {
 		return errors.New("mode is not set")
 	}
@@ -116,6 +148,8 @@ func ParseFlags() error {
 		noteFlags.Parse(os.Args[2:])
 	case "card":
 		cardFlags.Parse(os.Args[2:])
+	case "bin":
+		binFlags.Parse(os.Args[2:])
 	default:
 		return errors.New("unknown mode")
 	}
@@ -133,18 +167,7 @@ func ParseFlags() error {
 	} else if accFlags.Parsed() {
 		Op.Op = OpTypeAccount
 		Op.RecordType = common.AccountRecord
-		switch *accAction {
-		case "store":
-			Op.Subop = OpSubtypeRecordStore
-		case "get":
-			Op.Subop = OpSubtypeRecordGetID
-		case "list":
-			Op.Subop = OpSubtypeRecordListType
-		case "update":
-			Op.Subop = OpSubtypeRecordUpdateID
-		case "delete":
-			Op.Subop = OpSubtypeRecordDeleteID
-		}
+		Op.Subop = actionType(accAction)
 
 		Op.RecordName = *accName
 		Op.Account.UserName = *accUserName
@@ -155,18 +178,7 @@ func ParseFlags() error {
 	} else if noteFlags.Parsed() {
 		Op.Op = OpTypeNote
 		Op.RecordType = common.NoteRecord
-		switch *noteAction {
-		case "store":
-			Op.Subop = OpSubtypeRecordStore
-		case "get":
-			Op.Subop = OpSubtypeRecordGetID
-		case "list":
-			Op.Subop = OpSubtypeRecordListType
-		case "update":
-			Op.Subop = OpSubtypeRecordUpdateID
-		case "delete":
-			Op.Subop = OpSubtypeRecordDeleteID
-		}
+		Op.Subop = actionType(noteAction)
 
 		Op.RecordName = *noteName
 		Op.Note.Text = *noteText
@@ -175,18 +187,7 @@ func ParseFlags() error {
 	} else if cardFlags.Parsed() {
 		Op.Op = OpTypeCard
 		Op.RecordType = common.CardRecord
-		switch *cardAction {
-		case "store":
-			Op.Subop = OpSubtypeRecordStore
-		case "get":
-			Op.Subop = OpSubtypeRecordGetID
-		case "list":
-			Op.Subop = OpSubtypeRecordListType
-		case "update":
-			Op.Subop = OpSubtypeRecordUpdateID
-		case "delete":
-			Op.Subop = OpSubtypeRecordDeleteID
-		}
+		Op.Subop = actionType(cardAction)
 
 		Op.RecordName = *cardName
 		Op.Card.Holder = *cardHolder
@@ -196,7 +197,31 @@ func ParseFlags() error {
 		Op.Card.CVC = *cardCVC
 		Op.RecordMeta = *cardMeta
 		Op.RecordID = *cardID
+	} else if binFlags.Parsed() {
+		Op.Op = OpTypeBinary
+		Op.RecordType = common.BinaryRecord
+		Op.Subop = actionType(binAction)
+
+		Op.RecordName = *binName
+		var err error
+		if Op.Subop == OpSubtypeRecordStore || Op.Subop == OpSubtypeRecordUpdate {
+			Op.Binary.Data, err = readEncodeFile(*binFile)
+		}
+		Op.FileName = *binFile
+		if err != nil {
+			return err
+		}
+		Op.RecordID = *binID
 	}
 
 	return nil
+}
+
+func readEncodeFile(file string) (string, error) {
+	data, err := os.ReadFile(file)
+	if err != nil {
+		return "", err
+	}
+	str := base64.StdEncoding.EncodeToString(data)
+	return str, nil
 }

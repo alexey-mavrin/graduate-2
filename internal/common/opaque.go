@@ -33,3 +33,8 @@ func (c Card) Pack() (string, error) {
 	}
 	return string(opaque), nil
 }
+
+// Pack returns Data field of Binary
+func (b Binary) Pack() (string, error) {
+	return b.Data, nil
+}

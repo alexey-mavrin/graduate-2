@@ -9,7 +9,7 @@ func (r Record) String() string {
 	if r.Meta != "" {
 		repr += fmt.Sprintf("\n  Meta info: %s", r.Meta)
 	}
-	if r.Opaque != "" {
+	if r.Type != BinaryRecord && r.Opaque != "" {
 		repr += fmt.Sprintf("\n  Data: %s", r.Opaque)
 	}
 

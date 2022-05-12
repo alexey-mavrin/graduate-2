@@ -44,6 +44,8 @@ func ChooseAct() error {
 		return actRecord(config.Op.Subop, config.Op.Note)
 	case config.OpTypeCard:
 		return actRecord(config.Op.Subop, config.Op.Card)
+	case config.OpTypeBinary:
+		return actRecord(config.Op.Subop, config.Op.Binary)
 	default:
 		return errors.New("unknown operation type")
 	}

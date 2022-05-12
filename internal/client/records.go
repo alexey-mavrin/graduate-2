@@ -81,6 +81,11 @@ func (c *Client) DeleteRecordID(id int64) error {
 		return err
 	}
 
+	err = c.cacheDeleteRecordID(id)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

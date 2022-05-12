@@ -9,10 +9,6 @@ import (
 	"github.com/alexey-mavrin/graduate-2/internal/common"
 )
 
-//go:generate go run tmpl/generator.go Account
-//go:generate go run tmpl/generator.go Note
-//go:generate go run tmpl/generator.go Card
-
 func actUser(subop config.OpSubtype, user common.User) error {
 	clnt := client.NewClient(config.Cfg.ServerAddr,
 		config.Cfg.UserName,
@@ -43,11 +39,11 @@ func ChooseAct() error {
 	case config.OpTypeUser:
 		return actUser(config.Op.Subop, config.Op.User)
 	case config.OpTypeAccount:
-		return actAccount(config.Op.Subop, config.Op.Account)
+		return actRecord(config.Op.Subop, config.Op.Account)
 	case config.OpTypeNote:
-		return actNote(config.Op.Subop, config.Op.Note)
+		return actRecord(config.Op.Subop, config.Op.Note)
 	case config.OpTypeCard:
-		return actCard(config.Op.Subop, config.Op.Card)
+		return actRecord(config.Op.Subop, config.Op.Card)
 	default:
 		return errors.New("unknown operation type")
 	}

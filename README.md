@@ -247,7 +247,7 @@ go run cmd/client/main.go MODE -a ACTION flags
      Name: rec1
 
    GOSECRET_CFG=gosecret1.cfg go run cmd/client/main.go acc -a get -i 4
-2022/05/13 23:01:46 cipher: message authentication failed
+   2022/05/13 23:01:46 cipher: message authentication failed
    ```
 
 ## Разные TODO:

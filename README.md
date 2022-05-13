@@ -238,7 +238,7 @@ go run cmd/client/main.go MODE -a ACTION flags
    date > keys/secret_key_phrase_2.txt
 
    GOSECRET_CFG=gosecret1.cfg go run cmd/client/main.go user -a verify
-2022/05/13 23:01:04 user is verified
+   2022/05/13 23:01:04 user is verified
 
    GOSECRET_CFG=gosecret1.cfg go run cmd/client/main.go acc -a list
 

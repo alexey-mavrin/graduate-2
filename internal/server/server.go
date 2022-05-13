@@ -38,11 +38,38 @@ func checkSetContentType(next http.Handler) http.Handler {
 	})
 }
 
+var serverStore *store.Store
+
+// InitStore initialiese the server store
+func InitStore(storeFile string) error {
+	if storeFile == "" {
+		storeFile = defaultStoreFile
+	}
+	var err error
+	serverStore, err = store.NewStore(storeFile)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DropServerStore drops server storage
+func DropServerStore(storeFile string) error {
+	if storeFile == "" {
+		storeFile = defaultStoreFile
+	}
+	err := store.DropStore(storeFile)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // StartServer starts the server
 func StartServer(listenPort int, storeFile, keyFile, crtFile string) error {
-	store.DBFile = storeFile
-	if storeFile == "" {
-		store.DBFile = defaultStoreFile
+	err := InitStore(storeFile)
+	if err != nil {
+		return err
 	}
 
 	listenAddress := fmt.Sprintf(":%d", listenPort)
@@ -84,7 +111,11 @@ func StartServer(listenPort int, storeFile, keyFile, crtFile string) error {
 	}
 
 	log.Print("Server finished")
-	return store.CloseDB()
+	err = serverStore.CloseDB()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // NewRouter returns new Router

@@ -9,10 +9,10 @@ import (
 )
 
 func dropCreateStore(t *testing.T) *Store {
-	err := DropStore()
+	err := DropStore(defaultDBFile)
 	assert.NoError(t, err)
 
-	store, err := NewStore()
+	store, err := NewStore(defaultDBFile)
 	assert.NoError(t, err)
 
 	return store

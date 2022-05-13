@@ -2,7 +2,10 @@ package integration_test
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"fmt"
+	"io/ioutil"
+	"math/rand"
 	"os"
 	"os/exec"
 	"strings"
@@ -93,14 +96,14 @@ var _ = Describe("Run server and client together", func() {
 
 	Describe("Basic usage", func() {
 		It("Should successfully register user", func() {
-			By("Running client with 'user -a register'")
+			By("Running 'client user'")
 			stdOut, stdErr, err := runClient("user -a register")
 			fmt.Print(stdOut, stdErr)
 			Expect(err).NotTo(HaveOccurred(), "Client should register")
 		})
 
 		It("Should store and retrieve account", func() {
-			By("Running 'client acc -a store'")
+			By("Running 'client acc'")
 			_, _, err := runClient("user -a register")
 			Expect(err).NotTo(HaveOccurred(), "Client should register")
 
@@ -117,7 +120,7 @@ var _ = Describe("Run server and client together", func() {
 		})
 
 		It("Should store and retrieve note", func() {
-			By("Running 'client note -a store'")
+			By("Running 'client note'")
 			_, _, err := runClient("user -a register")
 			Expect(err).NotTo(HaveOccurred(), "Client should register")
 
@@ -134,12 +137,12 @@ var _ = Describe("Run server and client together", func() {
 		})
 
 		It("Should store and retrieve card", func() {
-			By("Running 'client card -a store'")
+			By("Running 'client card'")
 			_, _, err := runClient("user -a register")
 			Expect(err).NotTo(HaveOccurred(), "Client should register")
 
 			stdOut, stdErr, err := runClient(
-				"card -a store -n c1 -num 1111222233334444, -c 123",
+				"card -a store -n c1 -num 1111222233334444 -c 123",
 			)
 			fmt.Print(stdOut, stdErr)
 			Expect(err).NotTo(HaveOccurred(), "Client should run OK")
@@ -149,5 +152,64 @@ var _ = Describe("Run server and client together", func() {
 			fmt.Print(stdOut, stdErr)
 			Expect(err).NotTo(HaveOccurred(), "Client should run OK")
 		})
+
+		It("Should store and retrieve binary data", func() {
+			By("Running 'client bin'")
+			_, _, err := runClient("user -a register")
+			Expect(err).NotTo(HaveOccurred(), "Client should register")
+
+			file, err := makeBinFile(256)
+			Expect(err).NotTo(HaveOccurred(), "Binary file is created")
+			stdOut, stdErr, err := runClient(
+				fmt.Sprintf("bin -a store -n bin1 -f %s", file),
+			)
+			fmt.Print(stdOut, stdErr)
+
+			fileOut := file + ".out"
+			Expect(err).NotTo(HaveOccurred(), "Client should run OK")
+			stdOut, stdErr, err = runClient(
+				fmt.Sprintf("bin -a get -i 1 -f %s", fileOut),
+			)
+			fmt.Print(stdOut, stdErr)
+			Expect(err).NotTo(HaveOccurred(), "Client should run OK")
+
+			h1, err := getHash(file)
+			Expect(err).NotTo(HaveOccurred(), "Get original file hash")
+			h2, err := getHash(fileOut)
+			Expect(err).NotTo(HaveOccurred(), "Get saved file hash")
+			Expect(h1).To(Equal(h2), "Files should be the same")
+			os.Remove(file)
+			os.Remove(fileOut)
+		})
 	})
 })
+
+func makeBinFile(size uint) (string, error) {
+	file, err := ioutil.TempFile("/tmp", "bin")
+	if err != nil {
+		return "", err
+	}
+	_, err = file.Write(randomBin(size))
+	if err != nil {
+		return "", err
+	}
+	return file.Name(), nil
+}
+
+func randomBin(n uint) []byte {
+	rand.Seed(time.Now().UnixNano())
+	buf := make([]byte, n)
+	for i := range buf {
+		buf[i] = byte(rand.Intn(256))
+	}
+	return buf
+}
+
+func getHash(file string) ([sha256.Size]byte, error) {
+	buf, err := os.ReadFile(file)
+	if err != nil {
+		return [sha256.Size]byte{}, err
+	}
+	hash := sha256.Sum256(buf)
+	return hash, nil
+}

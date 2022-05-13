@@ -83,7 +83,7 @@ func (c *Client) DeleteRecordID(id int64) error {
 
 	err = c.cacheDeleteRecordID(id)
 	if err != nil {
-		return err
+		log.Print("cannot delete record from cache: ", err)
 	}
 
 	return nil

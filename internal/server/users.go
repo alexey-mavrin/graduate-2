@@ -35,19 +35,10 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s, err := store.NewStore()
-	if err != nil {
-		log.Print(err)
-		writeStatus(w,
-			http.StatusInternalServerError,
-			"Internal Server Error",
-		)
-		return
-	}
 	var resp common.AddUserResponse
 	resp.Name = user.Name
 	resp.Status = "OK"
-	resp.ID, err = s.AddUser(user)
+	resp.ID, err = serverStore.AddUser(user)
 	if err != nil {
 		log.Printf("AddUser() error: %v", err)
 		if errors.Is(err, store.ErrAlreadyExists) {

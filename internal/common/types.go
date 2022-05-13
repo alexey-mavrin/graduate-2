@@ -31,6 +31,11 @@ type Card struct {
 	CVC      string `json:"cvc"`
 }
 
+// Binary holds base64-encoded binary data
+type Binary struct {
+	Data string `json:"data"`
+}
+
 // Record can hold any record that could be stored
 type Record struct {
 	Name   string     `json:"name"`
@@ -52,16 +57,9 @@ const (
 	NoteRecord RecordType = "note"
 	// CardRecord is the Card record type
 	CardRecord RecordType = "card"
+	// BinaryRecord is the Binary record type
+	BinaryRecord RecordType = "binary"
 )
-
-// Accounts holds list of accounts indexed by id
-type Accounts map[int64]Account
-
-// Notes holds list of notes indexed by id
-type Notes map[int64]Note
-
-// Cards holds list of notes indexed by id
-type Cards map[int64]Card
 
 // AddUserResponse is the response for AddUser request
 type AddUserResponse struct {

@@ -22,17 +22,7 @@ func listRecords(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s, err := store.NewStore()
-	if err != nil {
-		log.Print(err)
-		writeStatus(w,
-			http.StatusInternalServerError,
-			"Internal Server Error",
-		)
-		return
-	}
-
-	records, err := s.ListRecords(user)
+	records, err := serverStore.ListRecords(user)
 	if err != nil {
 		log.Print(err)
 		writeStatus(w,
@@ -62,17 +52,7 @@ func listRecordsType(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s, err := store.NewStore()
-	if err != nil {
-		log.Print(err)
-		writeStatus(w,
-			http.StatusInternalServerError,
-			"Internal Server Error",
-		)
-		return
-	}
-
-	records, err := s.ListRecordsType(user, recordType)
+	records, err := serverStore.ListRecordsType(user, recordType)
 	if err != nil {
 		log.Print(err)
 		writeStatus(w,
@@ -107,17 +87,7 @@ func getRecordID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s, err := store.NewStore()
-	if err != nil {
-		log.Print(err)
-		writeStatus(w,
-			http.StatusInternalServerError,
-			"Internal Server Error",
-		)
-		return
-	}
-
-	record, err := s.GetRecordID(user, int64(id))
+	record, err := serverStore.GetRecordID(user, int64(id))
 	if err == store.ErrNotFound {
 		msg := fmt.Sprintf("Record id %d not found", id)
 		log.Print(msg)
@@ -156,17 +126,7 @@ func getRecordTypeName(w http.ResponseWriter, r *http.Request) {
 	recordType := common.RecordType(chi.URLParam(r, "record_type"))
 	recordName := chi.URLParam(r, "record_name")
 
-	s, err := store.NewStore()
-	if err != nil {
-		log.Print(err)
-		writeStatus(w,
-			http.StatusInternalServerError,
-			"Internal Server Error",
-		)
-		return
-	}
-
-	record, err := s.GetRecordTypeName(user, recordType, recordName)
+	record, err := serverStore.GetRecordTypeName(user, recordType, recordName)
 	if err == store.ErrNotFound {
 		msg := fmt.Sprintf("Record %s of type %s not found",
 			recordName, recordType)
@@ -209,17 +169,7 @@ func deleteRecordID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s, err := store.NewStore()
-	if err != nil {
-		log.Print(err)
-		writeStatus(w,
-			http.StatusInternalServerError,
-			"Internal Server Error",
-		)
-		return
-	}
-
-	err = s.DeleteRecordID(user, int64(id))
+	err = serverStore.DeleteRecordID(user, int64(id))
 	if err == store.ErrNotFound {
 		msg := fmt.Sprintf("Record id %d not found", id)
 		log.Print(msg)
@@ -250,17 +200,7 @@ func deleteRecordTypeName(w http.ResponseWriter, r *http.Request) {
 	recordType := common.RecordType(chi.URLParam(r, "record_type"))
 	recordName := chi.URLParam(r, "record_name")
 
-	s, err := store.NewStore()
-	if err != nil {
-		log.Print(err)
-		writeStatus(w,
-			http.StatusInternalServerError,
-			"Internal Server Error",
-		)
-		return
-	}
-
-	err = s.DeleteRecordTypeName(user, recordType, recordName)
+	err := serverStore.DeleteRecordTypeName(user, recordType, recordName)
 	if err == store.ErrNotFound {
 		msg := fmt.Sprintf("Record %s of type %s not found",
 			recordName, recordType)
@@ -299,16 +239,6 @@ func storeRecord(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s, err := store.NewStore()
-	if err != nil {
-		log.Print(err)
-		writeStatus(w,
-			http.StatusInternalServerError,
-			"Internal Server Error",
-		)
-		return
-	}
-
 	var resp common.StoreRecordResponse
 	resp.Status = "OK"
 
@@ -322,7 +252,7 @@ func storeRecord(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	resp.Name = record.Name
-	resp.ID, err = s.StoreRecord(user, record)
+	resp.ID, err = serverStore.StoreRecord(user, record)
 
 	if err != nil {
 		log.Printf("storeRecord() error: %v", err)
@@ -369,16 +299,6 @@ func updateRecordID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s, err := store.NewStore()
-	if err != nil {
-		log.Print(err)
-		writeStatus(w,
-			http.StatusInternalServerError,
-			"Internal Server Error",
-		)
-		return
-	}
-
 	var resp common.StoreRecordResponse
 	resp.Status = "OK"
 	var record common.Record
@@ -391,7 +311,7 @@ func updateRecordID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	resp.Name = record.Name
-	err = s.UpdateRecordID(user, int64(id), record)
+	err = serverStore.UpdateRecordID(user, int64(id), record)
 
 	if err != nil {
 		log.Printf("update record error: %v", err)
@@ -435,16 +355,6 @@ func updateRecordTypeName(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s, err := store.NewStore()
-	if err != nil {
-		log.Print(err)
-		writeStatus(w,
-			http.StatusInternalServerError,
-			"Internal Server Error",
-		)
-		return
-	}
-
 	var resp common.StoreRecordResponse
 	resp.Status = "OK"
 	var record common.Record
@@ -457,7 +367,7 @@ func updateRecordTypeName(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	resp.Name = record.Name
-	err = s.UpdateRecordTypeName(user, recordType, recordName, record)
+	err = serverStore.UpdateRecordTypeName(user, recordType, recordName, record)
 
 	if err != nil {
 		log.Printf("update record error: %v", err)

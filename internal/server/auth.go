@@ -3,17 +3,10 @@ package server
 import (
 	"log"
 	"net/http"
-
-	"github.com/alexey-mavrin/graduate-2/internal/store"
 )
 
 func verifyUser(user string, pass string) (bool, error) {
-	s, err := store.NewStore()
-	if err != nil {
-		return false, err
-	}
-
-	ok, err := s.CheckUserAuth(user, pass)
+	ok, err := serverStore.CheckUserAuth(user, pass)
 	if err != nil {
 		return false, err
 	}

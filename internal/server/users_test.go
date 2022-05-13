@@ -53,7 +53,9 @@ func Test_createUser(t *testing.T) {
 		},
 	}
 
-	require.NoError(t, store.DropStore())
+	require.NoError(t, store.DropStore(defaultStoreFile))
+	err := InitStore(defaultStoreFile)
+	assert.NoError(t, err)
 	router := NewRouter()
 
 	for _, tt := range tests {
@@ -79,7 +81,9 @@ func Test_createUser(t *testing.T) {
 func Test_pingHandler(t *testing.T) {
 	body := `{"name":"user1", "password":"pass"}`
 
-	require.NoError(t, store.DropStore())
+	require.NoError(t, store.DropStore(defaultStoreFile))
+	err := InitStore(defaultStoreFile)
+	assert.NoError(t, err)
 	router := NewRouter()
 
 	resp, _ := testHTTPRequest(t,

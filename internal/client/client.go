@@ -3,6 +3,7 @@ package client
 import (
 	"bytes"
 	"crypto/tls"
+	"log"
 	"net/http"
 	"time"
 
@@ -19,6 +20,7 @@ type Client struct {
 	UserName      string
 	UserPass      string
 	CacheFile     string
+	Store         *store.Store
 	Timeout       time.Duration
 	HTTPSInsecure bool
 }
@@ -30,7 +32,15 @@ func NewClient(serverAddr string,
 	cacheFile string,
 	httpsInsecure bool,
 ) *Client {
-	store.DBFile = cacheFile
+	var s *store.Store
+	var err error
+	if cacheFile != "" {
+		s, err = store.NewStore(cacheFile)
+		if err != nil {
+			log.Print(err)
+			return nil
+		}
+	}
 	return &Client{
 		ServerAddr:    serverAddr,
 		UserName:      userName,
@@ -38,6 +48,7 @@ func NewClient(serverAddr string,
 		CacheFile:     cacheFile,
 		Timeout:       defaultClientTimeout,
 		HTTPSInsecure: httpsInsecure,
+		Store:         s,
 	}
 }
 

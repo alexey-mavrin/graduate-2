@@ -9,7 +9,6 @@ import (
 	"github.com/alexey-mavrin/graduate-2/internal/common"
 	"github.com/alexey-mavrin/graduate-2/internal/store"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -18,7 +17,9 @@ const (
 )
 
 func prepareTest(t *testing.T) http.Handler {
-	require.NoError(t, store.DropStore())
+	store.DropStore(defaultStoreFile)
+	err := InitStore(defaultStoreFile)
+	assert.NoError(t, err)
 	router := NewRouter()
 	user := common.User{
 		Name:     testUser,

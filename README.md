@@ -6,9 +6,8 @@
 1. Хранение данных на стороне сервера: сейчас sqlite, в принципе, несложно
    перейти на другой вариант SQL БД.
 1. Аутентификация - basic + https
-1. сохраняемые данные - на настоящий момент пароли (`Accounts`),
-   текстовые записи (`Notes`) и данные платёжных карт (`Cards`)
-   TODO: добавить бинарные данные
+1. сохраняемые данные - пароли (`Account`), текстовые записи (`Note`),
+   данные платёжных карт (`Card`) и бинарные данные (`Binary`).
 1. Шифрование данных: на стороне клиента с помощью мастер-ключа
    алгоритмом AES. Данные шифруются перед отправкой на сервер и кэшированием.
    Шифруются поля `Password` и `Meta` для `Account`, и `Text` и `Meta` для `Note`,
@@ -92,6 +91,18 @@ go run cmd/client/main.go MODE -a ACTION flags
     	card name
     -num string
     	card number
+    ```
+  * для режима `bin`:
+    ```
+    -a string
+    	action: list|store|get|update|delete (default "list")
+    -f string
+    	file name
+    -i int
+    	binary record ID
+    -n string
+    	binary record name
+
     ```
 
 
@@ -191,6 +202,15 @@ go run cmd/client/main.go MODE -a ACTION flags
    $ go run cmd/client/main.go acc -a delete -i 1
    Account 1 deleted
    ```
+1. Для бинарных данных использование таково:
+   * для сохранения содержимого файла `FILE_NAME` на сервере:
+     ```
+     go run cmd/client/main.go acc -a store -n REC_NAME -f FILE_NAME
+     ```
+   * для получения с сервера и сохранения в файле `FILE_NAME`:
+     ```
+     go run cmd/client/main.go acc -a get -i REC_ID -f FILE_NAME
+     ```
 
 ## Разные TODO:
 * добавить проверки параметров командной строки на валидность и лимиты

@@ -1,10 +1,10 @@
 package client
 
 import (
-	"os"
 	"testing"
 
 	"github.com/alexey-mavrin/graduate-2/internal/common"
+	"github.com/alexey-mavrin/graduate-2/internal/store"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -65,11 +65,7 @@ func Test_recordsCache(t *testing.T) {
 	defer ts.Close()
 
 	cacheName := "cache_storage.db"
-	err = os.Remove(cacheName)
-	if err != nil && !os.IsNotExist(err) {
-		t.Fatal(err)
-	}
-
+	store.DropStore(cacheName)
 	clnt := NewClient(ts.URL, userName, userPass, cacheName, false)
 
 	_, err = clnt.RegisterUser("")
@@ -98,11 +94,7 @@ func Test_recordsUpdateCache(t *testing.T) {
 	defer ts.Close()
 
 	cacheName := "cache_storage.db"
-	err = os.Remove(cacheName)
-	if err != nil && !os.IsNotExist(err) {
-		t.Fatal(err)
-	}
-
+	store.DropStore(cacheName)
 	clnt := NewClient(ts.URL, userName, userPass, cacheName, false)
 
 	_, err = clnt.RegisterUser("")
@@ -141,10 +133,7 @@ func Test_recordsDeleteCache(t *testing.T) {
 	defer ts.Close()
 
 	cacheName := "cache_storage.db"
-	err = os.Remove(cacheName)
-	if err != nil && !os.IsNotExist(err) {
-		t.Fatal(err)
-	}
+	store.DropStore(cacheName)
 
 	clnt := NewClient(ts.URL, userName, userPass, cacheName, false)
 

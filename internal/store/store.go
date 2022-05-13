@@ -17,12 +17,6 @@ const (
 	defaultDBFile = "secret_storage.db"
 )
 
-// DBFile is the global db file name
-var DBFile = defaultDBFile
-
-var secretStore *Store
-var storeMutex sync.Mutex
-
 // ErrNotFound is to indicate the absence of the record
 var ErrNotFound = errors.New("Record not found")
 
@@ -31,29 +25,26 @@ var ErrAlreadyExists = errors.New("Entity already exists")
 
 // Store is the secret storage
 type Store struct {
-	db *sql.DB
+	db     *sql.DB
+	dbFile string
+	mutex  sync.Mutex
 }
 
 // CloseDB closes database
-func CloseDB() error {
-	if secretStore != nil {
-		err := secretStore.db.Close()
-		if err != nil {
-			return err
-		}
-		secretStore = nil
+func (s *Store) CloseDB() error {
+	if s == nil {
+		return errors.New("store is nill")
+	}
+	err := s.db.Close()
+	if err != nil {
+		return err
 	}
 	return nil
 }
 
 // DropStore removes the storage completely. Use for tests
-func DropStore() error {
-	err := CloseDB()
-	if err != nil {
-		return err
-	}
-
-	err = os.Remove(DBFile)
+func DropStore(dbFile string) error {
+	err := os.Remove(dbFile)
 	if os.IsNotExist(err) {
 		return nil
 	}
@@ -61,18 +52,11 @@ func DropStore() error {
 }
 
 // NewStore initializes new storage or opens existing one
-func NewStore() (*Store, error) {
-	storeMutex.Lock()
-	defer storeMutex.Unlock()
-
-	if secretStore != nil {
-		return secretStore, nil
-	}
-
-	secretStore = &Store{}
+func NewStore(storeName string) (*Store, error) {
+	secretStore := &Store{}
 	var err error
 
-	secretStore.db, err = sql.Open("sqlite3", DBFile)
+	secretStore.db, err = sql.Open("sqlite3", storeName)
 	if err != nil {
 		return secretStore, err
 	}
@@ -112,7 +96,7 @@ func NewStore() (*Store, error) {
 }
 
 func (s *Store) isUserExists(userName string) (bool, error) {
-	row := secretStore.db.QueryRow(
+	row := s.db.QueryRow(
 		`SELECT count(*) FROM users WHERE user = ?`,
 		userName,
 	)
@@ -131,7 +115,7 @@ func (s *Store) isUserExists(userName string) (bool, error) {
 // CheckUserAuth checks the user password match
 func (s *Store) CheckUserAuth(userName string, userPass string) (bool, error) {
 
-	row := secretStore.db.QueryRow(
+	row := s.db.QueryRow(
 		`SELECT password_hash FROM users WHERE user = ?`,
 		userName,
 	)
@@ -156,8 +140,8 @@ func (s *Store) CheckUserAuth(userName string, userPass string) (bool, error) {
 
 // AddUser creates user account
 func (s *Store) AddUser(user common.User) (int64, error) {
-	storeMutex.Lock()
-	defer storeMutex.Unlock()
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 
 	hash := sha256.Sum256([]byte(user.Password))
 	passwordHash := hex.EncodeToString(hash[:])
@@ -171,7 +155,7 @@ func (s *Store) AddUser(user common.User) (int64, error) {
 		return 0, ErrAlreadyExists
 	}
 
-	res, err := secretStore.db.Exec(`INSERT INTO users
+	res, err := s.db.Exec(`INSERT INTO users
 		(user, full_name, password_hash)
 		VALUES(?, ?, ?)`,
 		user.Name,

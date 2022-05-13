@@ -4,11 +4,14 @@ import (
 	"net/http/httptest"
 
 	"github.com/alexey-mavrin/graduate-2/internal/server"
-	"github.com/alexey-mavrin/graduate-2/internal/store"
 )
 
 func newHTTPServer() (*httptest.Server, error) {
-	err := store.DropStore()
+	err := server.DropServerStore("")
+	if err != nil {
+		return nil, err
+	}
+	err = server.InitStore("")
 	if err != nil {
 		return nil, err
 	}

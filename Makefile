@@ -21,6 +21,7 @@ db_clean:
 	@rm -f $(ROOT_DIR)/server_storage.db
 	@rm -f $(ROOT_DIR)/internal/store/secret_storage.db
 	@rm -f $(ROOT_DIR)/internal/server/secret_storage.db
+	@rm -f $(ROOT_DIR)/internal/client/cache_storage.db
 	@rm -f $(ROOT_DIR)/server_storage.db
 	@rm -f $(ROOT_DIR)/cache_store.db
 	@rm -f $(ROOT_DIR)/tests/cache_inttest_store.db

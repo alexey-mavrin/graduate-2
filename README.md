@@ -152,9 +152,8 @@ go run cmd/client/main.go MODE -a ACTION flags
 
 Далее показаны действия по работе с аккаунтами (логин-пароль-url-мета).
 Для других типов данных (платёжные карты и текстовые записи)
-действия аналогичны.
-
-Для бинарных данных действия отличаются (TODO: добавить)
+действия аналогичны. Для бинарных данных примеры приведены ниже -
+они отличаются заданием имени файла.
 
 1. Сохранить данные аккаунтов:
    ```
@@ -177,7 +176,13 @@ go run cmd/client/main.go MODE -a ACTION flags
 1. Получить список сохранённых аккаунтов:
    ```
    $ go run cmd/client/main.go acc -a list
-   map[1:{My account http://example.com user123  test account, some info} 2:{Another account http://example.org user22  second account, metainfo}]
+
+   Id: 2
+     Type: account
+     Name: Another account
+   Id: 1
+     Type: account
+     Name: My account
    ```
 1. Обновить аккаунт
    ```
@@ -188,27 +193,62 @@ go run cmd/client/main.go MODE -a ACTION flags
        -p passW0RD \
        -l https://example.org:4433 \
        -m "second account, Meta Info"
-   account updated
+   record updated
    ```
 1. Получить запись аккаунта:
    ```
    $ go run cmd/client/main.go acc -a get -i 2
-   {Another account https://example.org:4433 user22 passW0RD second account, Meta Info}
+
+    Type: account
+    Name: Another account
+    Meta info: second account, Meta Info
+    Data: {"url":"https://example.org:4433","user_name":"user22","password":"passW0RD"}
    ```
 1. Удалить аккаунт:
    ```
    $ go run cmd/client/main.go acc -a delete -i 1
-   Account 1 deleted
+   Record 1 deleted
    ```
 1. Для бинарных данных использование таково:
    * для сохранения содержимого файла `FILE_NAME` на сервере:
      ```
-     go run cmd/client/main.go acc -a store -n REC_NAME -f FILE_NAME
+     go run cmd/client/main.go bin -a store -n REC_NAME -f FILE_NAME
+     record stored with id 3
      ```
    * для получения с сервера и сохранения в файле `FILE_NAME`:
      ```
-     go run cmd/client/main.go acc -a get -i REC_ID -f FILE_NAME
+     go run cmd/client/main.go bin -a get -i 3 -f FILE_NAME
+
+       Type: binary
+       Name: REC_NAME
+       File FILE_NAME is written
      ```
+1. Работа от другого пользователя: создать другой файл конфигурации,
+   именить его параметры, указать через переменную окружения:
+   ```
+   GOSECRET_CFG=gosecret1.cfg go run cmd/client/main.go user -a register
+   2022/05/13 22:52:40 user is registered with id 2
+
+   GOSECRET_CFG=gosecret1.cfg go run cmd/client/main.go user -a verify
+   2022/05/13 22:58:04 user is verified
+   ```
+1. В случае утери секретной фразы, зная пароль учётной записи,
+   можно получить список записей, но нельзя получить их секретную часть:
+   ```
+   date > keys/secret_key_phrase_2.txt
+
+   GOSECRET_CFG=gosecret1.cfg go run cmd/client/main.go user -a verify
+2022/05/13 23:01:04 user is verified
+
+   GOSECRET_CFG=gosecret1.cfg go run cmd/client/main.go acc -a list
+
+   Id: 4
+     Type: account
+     Name: rec1
+
+   GOSECRET_CFG=gosecret1.cfg go run cmd/client/main.go acc -a get -i 4
+2022/05/13 23:01:46 cipher: message authentication failed
+   ```
 
 ## Разные TODO:
 * добавить проверки параметров командной строки на валидность и лимиты
@@ -222,3 +262,12 @@ go run cmd/client/main.go MODE -a ACTION flags
   записи в кэше зашифрованы, так что, возможно, это не требуется
 * добавить ключ "clear cache"
 * Добавить кеширование всех пользовательских данных по запросу единовременно
+* Сделать сообщения об ошибках более user friendly. Например, при попытке создания
+  записи с повторяющимся именем и типом, клиент сейчас пишет
+  ```
+  2022/05/13 22:48:15 storing account: http status 500: Cannot Store Record: UNIQUE constraint failed: records.user_id, records.name, records.type
+  ```
+  А при попытке получить несуществующую запись
+  ```
+  2022/05/13 22:54:58 get account: http status 404
+  ```

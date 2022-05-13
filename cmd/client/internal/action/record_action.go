@@ -57,6 +57,7 @@ func actRecord(subop config.OpSubtype, subrecord common.Opaque) error {
 			if err != nil {
 				return err
 			}
+			fmt.Printf("  File %s is written\n", config.Op.FileName)
 		}
 	case config.OpSubtypeRecordList:
 		records, err := clnt.ListRecordsType(config.Op.RecordType)

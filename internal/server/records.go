@@ -114,6 +114,48 @@ func getRecordByID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func getRecordID(w http.ResponseWriter, r *http.Request) {
+	log.Print("getRecordID")
+
+	user, _, ok := r.BasicAuth()
+	if !ok {
+		writeStatus(w, http.StatusBadRequest, "no basic auth")
+		return
+	}
+
+	recordType := common.RecordType(chi.URLParam(r, "record_type"))
+	recordName := chi.URLParam(r, "record_name")
+
+	var resp common.StoreRecordResponse
+	var err error
+	resp.ID, err = serverStore.GetRecordID(user, recordType, recordName)
+	if err == store.ErrNotFound {
+		msg := fmt.Sprintf("Record %s of type %s not found",
+			recordName, recordType)
+		log.Print(msg)
+		writeStatus(w, http.StatusNotFound, msg)
+		return
+	}
+	if err != nil {
+		log.Print(err)
+		writeStatus(w,
+			http.StatusInternalServerError,
+			"Internal Server Error",
+		)
+		return
+	}
+	err = json.NewEncoder(w).Encode(resp)
+
+	if err != nil {
+		log.Print(err)
+		writeStatus(w,
+			http.StatusInternalServerError,
+			"Internal Server Error",
+		)
+		return
+	}
+}
+
 func getRecordByTypeName(w http.ResponseWriter, r *http.Request) {
 	log.Print("getRecordTypeName")
 

@@ -10,7 +10,7 @@ import (
 	"github.com/alexey-mavrin/graduate-2/internal/common"
 )
 
-// ListRecordsByType lists account for the current user
+// ListRecordsByType lists records for the current user
 func (c *Client) ListRecordsByType(t common.RecordType) (common.Records, error) {
 	var records common.Records
 	path := fmt.Sprintf("/records/by_type/%s", t)
@@ -48,7 +48,7 @@ func (c *Client) ListRecordsByType(t common.RecordType) (common.Records, error) 
 	return records, nil
 }
 
-// DeleteRecordByID returns account record with the given id
+// DeleteRecordByID deletes record record with the given id
 func (c *Client) DeleteRecordByID(id int64) error {
 	path := fmt.Sprintf("/records/%d", id)
 	req, err := c.prepaReq(http.MethodDelete, path, nil)
@@ -89,7 +89,18 @@ func (c *Client) DeleteRecordByID(id int64) error {
 	return nil
 }
 
-// GetRecordByID returns account record with the given id
+// GetRecordByTypeName returns record with the given type and name
+func (c *Client) GetRecordByTypeName(t common.RecordType,
+	name string,
+) (common.Record, error) {
+	id, err := c.GetRecordID(t, name)
+	if err != nil {
+		return common.Record{}, err
+	}
+	return c.GetRecordByID(id)
+}
+
+// GetRecordByID returns record with the given id
 func (c *Client) GetRecordByID(id int64) (common.Record, error) {
 	var record common.Record
 
@@ -110,7 +121,7 @@ func (c *Client) GetRecordByID(id int64) (common.Record, error) {
 
 	if resp.StatusCode != http.StatusOK {
 		err = fmt.Errorf(
-			"get account: http status %d",
+			"get record: http status %d",
 			resp.StatusCode,
 		)
 		return record, err
@@ -134,7 +145,48 @@ func (c *Client) GetRecordByID(id int64) (common.Record, error) {
 	return record, nil
 }
 
-// UpdateRecordByID updates account record with the given id
+// GetRecordID returns ID of the record with the given type and name
+func (c *Client) GetRecordID(t common.RecordType,
+	name string,
+) (int64, error) {
+	var getIDResp common.StoreRecordResponse
+
+	path := fmt.Sprintf("/records/%s/%s", t, name)
+	req, err := c.prepaReq(http.MethodGet, path, nil)
+	if err != nil {
+		return 0, err
+	}
+
+	client := c.httpClient()
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Printf("cannot contact the server: %v, trying local cache", err)
+		return c.cacheGetRecordID(t, name)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		err = fmt.Errorf(
+			"get record: http status %d",
+			resp.StatusCode,
+		)
+		return 0, err
+	}
+
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return 0, err
+	}
+
+	err = json.Unmarshal(respBody, &getIDResp)
+	if err != nil {
+		return 0, err
+	}
+
+	return getIDResp.ID, nil
+}
+
+// UpdateRecordByID updates record with the given id
 func (c *Client) UpdateRecordByID(id int64, record common.Record) error {
 	body, err := json.Marshal(record)
 	if err != nil {
@@ -165,7 +217,7 @@ func (c *Client) UpdateRecordByID(id int64, record common.Record) error {
 	}
 	if resp.StatusCode != http.StatusOK {
 		err = fmt.Errorf(
-			"updating account: http status %d: %s",
+			"updating record: http status %d: %s",
 			resp.StatusCode,
 			status.Status,
 		)
@@ -180,7 +232,7 @@ func (c *Client) UpdateRecordByID(id int64, record common.Record) error {
 	return nil
 }
 
-// StoreRecord stores account record
+// StoreRecord stores record
 func (c *Client) StoreRecord(record common.Record) (int64, error) {
 	body, err := json.Marshal(record)
 	if err != nil {
@@ -212,7 +264,7 @@ func (c *Client) StoreRecord(record common.Record) (int64, error) {
 
 	if resp.StatusCode != http.StatusOK {
 		err = fmt.Errorf(
-			"storing account: http status %d: %s",
+			"storing record: http status %d: %s",
 			resp.StatusCode,
 			status.Status,
 		)

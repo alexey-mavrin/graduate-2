@@ -33,6 +33,34 @@ func (s *Store) StoreRecordWithID(id int64,
 	return nil
 }
 
+// GetRecordID returns the ID of the record with the given type and name
+func (s *Store) GetRecordID(user string,
+	t common.RecordType,
+	name string,
+) (int64, error) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	row := s.db.QueryRow(
+		`SELECT records.id
+			FROM records JOIN users ON records.user_id = users.id
+			WHERE users.user = ?
+			AND records.type = ?
+			AND records.name = ?`,
+		user, t, name,
+	)
+
+	var id int64
+	err := row.Scan(&id)
+	if err == sql.ErrNoRows {
+		return 0, ErrNotFound
+	}
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
 // StoreRecord stores Record data for given user
 func (s *Store) StoreRecord(user string, record common.Record) (int64, error) {
 	s.mutex.Lock()

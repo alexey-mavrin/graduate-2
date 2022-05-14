@@ -59,6 +59,8 @@ const (
 	CardRecord RecordType = "card"
 	// BinaryRecord is the Binary record type
 	BinaryRecord RecordType = "binary"
+	// UnspecifiedRecord is the unspecified record type
+	UnspecifiedRecord RecordType = ""
 )
 
 // AddUserResponse is the response for AddUser request

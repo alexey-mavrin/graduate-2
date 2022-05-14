@@ -43,7 +43,16 @@ func actRecord(subop config.OpSubtype, subrecord common.Opaque) error {
 		}
 		fmt.Printf("record stored with id %d\n", id)
 	case config.OpSubtypeRecordGet:
-		eRecord, err := clnt.GetRecordByID(config.Op.RecordID)
+		var eRecord common.Record
+		var err error
+		if config.Op.RecordID != 0 {
+			eRecord, err = clnt.GetRecordByID(config.Op.RecordID)
+		} else {
+			eRecord, err = clnt.GetRecordByTypeName(
+				config.Op.RecordType,
+				config.Op.RecordName,
+			)
+		}
 		if err != nil {
 			return err
 		}

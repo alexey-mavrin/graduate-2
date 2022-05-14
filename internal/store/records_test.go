@@ -30,12 +30,12 @@ func TestStore_GetRecord(t *testing.T) {
 		id, err := store.StoreRecord(user, record)
 		assert.NoError(t, err)
 
-		recordRet, err := store.GetRecordID(user, id)
+		recordRet, err := store.GetRecordByID(user, id)
 		assert.NoError(t, err)
 
 		assert.Equal(t, record, recordRet)
 
-		recordRet, err = store.GetRecordTypeName(user, recType, recName)
+		recordRet, err = store.GetRecordByTypeName(user, recType, recName)
 		assert.NoError(t, err)
 
 		assert.Equal(t, record, recordRet)
@@ -108,26 +108,26 @@ func TestStore_DeleteRecord(t *testing.T) {
 		id, err := store.StoreRecord(user, record)
 		assert.NoError(t, err)
 
-		err = store.DeleteRecordID(user, id)
+		err = store.DeleteRecordByID(user, id)
 		assert.NoError(t, err)
 
 		// same attempt should result in error
-		err = store.DeleteRecordID(user, id)
+		err = store.DeleteRecordByID(user, id)
 		assert.Error(t, err)
 
 		// attempt to delete non-existing record# recourd
 		// should result in error
-		err = store.DeleteRecordID(user, 999999)
+		err = store.DeleteRecordByID(user, 999999)
 		assert.Error(t, err)
 
 		_, err = store.StoreRecord(user, record)
 		assert.NoError(t, err)
 
-		err = store.DeleteRecordTypeName(user, recType, recName)
+		err = store.DeleteRecordByTypeName(user, recType, recName)
 		assert.NoError(t, err)
 
 		// same attempt should result in error
-		err = store.DeleteRecordTypeName(user, recType, recName)
+		err = store.DeleteRecordByTypeName(user, recType, recName)
 		assert.Error(t, err)
 
 	})
@@ -155,19 +155,19 @@ func TestStore_UpdateRecord(t *testing.T) {
 		})
 		assert.NoError(t, err)
 
-		err = store.UpdateRecordID(user, id, common.Record{
+		err = store.UpdateRecordByID(user, id, common.Record{
 			Name:   name,
 			Type:   recType,
 			Opaque: opaque2,
 		})
 		assert.NoError(t, err)
 
-		record, err := store.GetRecordID(user, id)
+		record, err := store.GetRecordByID(user, id)
 		assert.NoError(t, err)
 		assert.Equal(t, opaque2, record.Opaque,
 			"Updated record number should change")
 
-		err = store.UpdateRecordTypeName(user, recType, name,
+		err = store.UpdateRecordByTypeName(user, recType, name,
 			common.Record{
 				Name:   name,
 				Type:   recType,
@@ -175,7 +175,7 @@ func TestStore_UpdateRecord(t *testing.T) {
 			})
 		assert.NoError(t, err)
 
-		record, err = store.GetRecordID(user, id)
+		record, err = store.GetRecordByID(user, id)
 		assert.NoError(t, err)
 		assert.Equal(t, opaque3, record.Opaque,
 			"Updated record number should change (again)")

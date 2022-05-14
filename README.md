@@ -235,7 +235,7 @@ go run cmd/client/main.go MODE -a ACTION flags
 1. В случае утери секретной фразы, зная пароль учётной записи,
    можно получить список записей, но нельзя получить их секретную часть:
    ```
-   date > keys/secret_key_phrase_2.txt
+   echo "wrongphrase" > keys/secret_key_phrase_2.txt
 
    GOSECRET_CFG=gosecret1.cfg go run cmd/client/main.go user -a verify
    2022/05/13 23:01:04 user is verified

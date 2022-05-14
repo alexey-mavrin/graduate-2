@@ -34,7 +34,7 @@ func Test_records(t *testing.T) {
 	id, err := clnt.StoreRecord(record)
 	assert.NoError(t, err)
 
-	records, err := clnt.ListRecordsType(recType)
+	records, err := clnt.ListRecordsByType(recType)
 	assert.NoError(t, err)
 	expRecord := record
 	expRecord.Opaque = ""
@@ -44,18 +44,18 @@ func Test_records(t *testing.T) {
 	updateRecord := record
 	updateRecord.Opaque = "2222"
 
-	err = clnt.UpdateRecordID(id, updateRecord)
+	err = clnt.UpdateRecordByID(id, updateRecord)
 	assert.NoError(t, err)
 
-	gotRecord, err := clnt.GetRecordID(id)
+	gotRecord, err := clnt.GetRecordByID(id)
 	assert.NoError(t, err)
 
 	assert.Equal(t, updateRecord, gotRecord)
 
-	err = clnt.DeleteRecordID(id)
+	err = clnt.DeleteRecordByID(id)
 	assert.NoError(t, err)
 
-	gotRecord, err = clnt.GetRecordID(id)
+	gotRecord, err = clnt.GetRecordByID(id)
 	assert.Error(t, err)
 }
 
@@ -83,7 +83,7 @@ func Test_recordsCache(t *testing.T) {
 	ts.Close()
 
 	// should get record# from cache
-	gotRecord, err := clnt.GetRecordID(id)
+	gotRecord, err := clnt.GetRecordByID(id)
 	assert.NoError(t, err)
 	assert.Equal(t, gotRecord, record)
 }
@@ -116,13 +116,13 @@ func Test_recordsUpdateCache(t *testing.T) {
 	id, err := clnt.StoreRecord(record)
 	assert.NoError(t, err)
 
-	err = clnt.UpdateRecordID(id, recordUpd)
+	err = clnt.UpdateRecordByID(id, recordUpd)
 	assert.NoError(t, err)
 
 	ts.Close()
 
 	// should get record# from cache
-	gotRecord, err := clnt.GetRecordID(id)
+	gotRecord, err := clnt.GetRecordByID(id)
 	assert.NoError(t, err)
 	assert.Equal(t, recordUpd, gotRecord)
 }
@@ -149,12 +149,12 @@ func Test_recordsDeleteCache(t *testing.T) {
 	id, err := clnt.StoreRecord(record)
 	assert.NoError(t, err)
 
-	err = clnt.DeleteRecordID(id)
+	err = clnt.DeleteRecordByID(id)
 	assert.NoError(t, err)
 
 	ts.Close()
 
 	// should NOT get record from cache
-	_, err = clnt.GetRecordID(id)
+	_, err = clnt.GetRecordByID(id)
 	assert.Error(t, err)
 }

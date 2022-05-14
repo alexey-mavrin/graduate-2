@@ -10,8 +10,8 @@ import (
 	"github.com/alexey-mavrin/graduate-2/internal/common"
 )
 
-// ListRecordsType lists account for the current user
-func (c *Client) ListRecordsType(t common.RecordType) (common.Records, error) {
+// ListRecordsByType lists account for the current user
+func (c *Client) ListRecordsByType(t common.RecordType) (common.Records, error) {
 	var records common.Records
 	path := fmt.Sprintf("/records/by_type/%s", t)
 	req, err := c.prepaReq(http.MethodGet, path, nil)
@@ -23,7 +23,7 @@ func (c *Client) ListRecordsType(t common.RecordType) (common.Records, error) {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("cannot contact the server: %v, trying local cache", err)
-		records, err := c.cacheListRecordsType(t)
+		records, err := c.cacheListRecordsByType(t)
 		return records, err
 	}
 	defer resp.Body.Close()
@@ -48,8 +48,8 @@ func (c *Client) ListRecordsType(t common.RecordType) (common.Records, error) {
 	return records, nil
 }
 
-// DeleteRecordID returns account record with the given id
-func (c *Client) DeleteRecordID(id int64) error {
+// DeleteRecordByID returns account record with the given id
+func (c *Client) DeleteRecordByID(id int64) error {
 	path := fmt.Sprintf("/records/%d", id)
 	req, err := c.prepaReq(http.MethodDelete, path, nil)
 	if err != nil {
@@ -81,7 +81,7 @@ func (c *Client) DeleteRecordID(id int64) error {
 		return err
 	}
 
-	err = c.cacheDeleteRecordID(id)
+	err = c.cacheDeleteRecordByID(id)
 	if err != nil {
 		log.Print("cannot delete record from cache: ", err)
 	}
@@ -89,8 +89,8 @@ func (c *Client) DeleteRecordID(id int64) error {
 	return nil
 }
 
-// GetRecordID returns account record with the given id
-func (c *Client) GetRecordID(id int64) (common.Record, error) {
+// GetRecordByID returns account record with the given id
+func (c *Client) GetRecordByID(id int64) (common.Record, error) {
 	var record common.Record
 
 	path := fmt.Sprintf("/records/%d", id)
@@ -103,7 +103,7 @@ func (c *Client) GetRecordID(id int64) (common.Record, error) {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("cannot contact the server: %v, trying local cache", err)
-		record, err := c.cacheGetRecordID(id)
+		record, err := c.cacheGetRecordByID(id)
 		return record, err
 	}
 	defer resp.Body.Close()
@@ -125,7 +125,7 @@ func (c *Client) GetRecordID(id int64) (common.Record, error) {
 	if err != nil {
 		return record, err
 	}
-	err = c.cacheRecordID(id, record)
+	err = c.cacheRecordWithID(id, record)
 
 	if err != nil {
 		log.Printf("cache record: %v", err)
@@ -134,8 +134,8 @@ func (c *Client) GetRecordID(id int64) (common.Record, error) {
 	return record, nil
 }
 
-// UpdateRecordID updates account record with the given id
-func (c *Client) UpdateRecordID(id int64, record common.Record) error {
+// UpdateRecordByID updates account record with the given id
+func (c *Client) UpdateRecordByID(id int64, record common.Record) error {
 	body, err := json.Marshal(record)
 	if err != nil {
 		return err
@@ -172,7 +172,7 @@ func (c *Client) UpdateRecordID(id int64, record common.Record) error {
 		return err
 	}
 
-	err = c.cacheRecordID(id, record)
+	err = c.cacheRecordWithID(id, record)
 	if err != nil {
 		log.Printf("cache %s: %v", record.Type, err)
 	}
@@ -219,7 +219,7 @@ func (c *Client) StoreRecord(record common.Record) (int64, error) {
 		return 0, err
 	}
 
-	err = c.cacheRecordID(status.ID, record)
+	err = c.cacheRecordWithID(status.ID, record)
 	if err != nil {
 		log.Printf("cache %s: %v", record.Type, err)
 	}

@@ -43,7 +43,7 @@ func actRecord(subop config.OpSubtype, subrecord common.Opaque) error {
 		}
 		fmt.Printf("record stored with id %d\n", id)
 	case config.OpSubtypeRecordGet:
-		eRecord, err := clnt.GetRecordID(config.Op.RecordID)
+		eRecord, err := clnt.GetRecordByID(config.Op.RecordID)
 		if err != nil {
 			return err
 		}
@@ -60,7 +60,7 @@ func actRecord(subop config.OpSubtype, subrecord common.Opaque) error {
 			fmt.Printf("  File %s is written\n", config.Op.FileName)
 		}
 	case config.OpSubtypeRecordList:
-		records, err := clnt.ListRecordsType(config.Op.RecordType)
+		records, err := clnt.ListRecordsByType(config.Op.RecordType)
 		if err != nil {
 			return err
 		}
@@ -81,13 +81,13 @@ func actRecord(subop config.OpSubtype, subrecord common.Opaque) error {
 		if err != nil {
 			return err
 		}
-		err = clnt.UpdateRecordID(config.Op.RecordID, eRecord)
+		err = clnt.UpdateRecordByID(config.Op.RecordID, eRecord)
 		if err != nil {
 			return err
 		}
 		fmt.Println("record updated")
 	case config.OpSubtypeRecordDelete:
-		err := clnt.DeleteRecordID(config.Op.RecordID)
+		err := clnt.DeleteRecordByID(config.Op.RecordID)
 		if err != nil {
 			return err
 		}

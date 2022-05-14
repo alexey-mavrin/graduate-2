@@ -8,8 +8,11 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// StoreRecordID stores record with the ID specified
-func (s *Store) StoreRecordID(id int64, user string, record common.Record) error {
+// StoreRecordWithID stores record with the ID specified
+func (s *Store) StoreRecordWithID(id int64,
+	user string,
+	record common.Record,
+) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
@@ -55,8 +58,11 @@ func (s *Store) StoreRecord(user string, record common.Record) (int64, error) {
 	return id, nil
 }
 
-// UpdateRecordID updates an record by ID
-func (s *Store) UpdateRecordID(user string, id int64, record common.Record) error {
+// UpdateRecordByID updates an record by ID
+func (s *Store) UpdateRecordByID(user string,
+	id int64,
+	record common.Record,
+) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
@@ -88,8 +94,8 @@ func (s *Store) UpdateRecordID(user string, id int64, record common.Record) erro
 	return nil
 }
 
-// UpdateRecordTypeName updates an record by type and name
-func (s *Store) UpdateRecordTypeName(user string,
+// UpdateRecordByTypeName updates an record by type and name
+func (s *Store) UpdateRecordByTypeName(user string,
 	t common.RecordType,
 	name string,
 	record common.Record,
@@ -157,9 +163,9 @@ func (s *Store) ListRecords(user string) (common.Records, error) {
 	return records, nil
 }
 
-// ListRecordsType returns list of stored records of the given type
+// ListRecordsByType returns list of stored records of the given type
 // for the given user with name and type fields filled
-func (s *Store) ListRecordsType(user string,
+func (s *Store) ListRecordsByType(user string,
 	t common.RecordType,
 ) (common.Records, error) {
 	s.mutex.Lock()
@@ -189,8 +195,8 @@ func (s *Store) ListRecordsType(user string,
 	return records, nil
 }
 
-// GetRecordID returns stored record by ID
-func (s *Store) GetRecordID(user string, id int64) (common.Record, error) {
+// GetRecordByID returns stored record by ID
+func (s *Store) GetRecordByID(user string, id int64) (common.Record, error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
@@ -217,8 +223,8 @@ func (s *Store) GetRecordID(user string, id int64) (common.Record, error) {
 	return record, nil
 }
 
-// GetRecordTypeName returns stored record by type and name
-func (s *Store) GetRecordTypeName(user string,
+// GetRecordByTypeName returns stored record by type and name
+func (s *Store) GetRecordByTypeName(user string,
 	t common.RecordType,
 	name string,
 ) (common.Record, error) {
@@ -250,8 +256,8 @@ func (s *Store) GetRecordTypeName(user string,
 	return record, nil
 }
 
-// DeleteRecordID deletes the specified record record by ID
-func (s *Store) DeleteRecordID(user string, id int64) error {
+// DeleteRecordByID deletes the specified record record by ID
+func (s *Store) DeleteRecordByID(user string, id int64) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
@@ -277,8 +283,8 @@ func (s *Store) DeleteRecordID(user string, id int64) error {
 	return nil
 }
 
-// DeleteRecordTypeName deletes the specified record record by type and name
-func (s *Store) DeleteRecordTypeName(user string,
+// DeleteRecordByTypeName deletes the specified record record by type and name
+func (s *Store) DeleteRecordByTypeName(user string,
 	t common.RecordType,
 	name string,
 ) error {

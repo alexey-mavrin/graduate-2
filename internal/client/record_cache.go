@@ -5,7 +5,7 @@ import (
 	"github.com/alexey-mavrin/graduate-2/internal/store"
 )
 
-func (c *Client) cacheDeleteRecordID(id int64) error {
+func (c *Client) cacheDeleteRecordByID(id int64) error {
 	if c.CacheFile == "" {
 		return nil
 	}
@@ -16,7 +16,7 @@ func (c *Client) cacheDeleteRecordID(id int64) error {
 	return nil
 }
 
-func (c *Client) cacheRecordID(storeID int64, record common.Record) error {
+func (c *Client) cacheRecordWithID(storeID int64, record common.Record) error {
 	if c.CacheFile == "" {
 		return nil
 	}
@@ -40,7 +40,7 @@ func (c *Client) cacheRecordID(storeID int64, record common.Record) error {
 	return nil
 }
 
-func (c *Client) cacheGetRecordID(id int64) (common.Record, error) {
+func (c *Client) cacheGetRecordByID(id int64) (common.Record, error) {
 	if c.CacheFile == "" {
 		return common.Record{}, nil
 	}
@@ -55,7 +55,9 @@ func (c *Client) cacheListRecords() (common.Records, error) {
 	return c.Store.ListRecords(c.UserName)
 }
 
-func (c *Client) cacheListRecordsType(t common.RecordType) (common.Records, error) {
+func (c *Client) cacheListRecordsByType(
+	t common.RecordType,
+) (common.Records, error) {
 	records := make(common.Records)
 	if c.CacheFile == "" {
 		return records, nil

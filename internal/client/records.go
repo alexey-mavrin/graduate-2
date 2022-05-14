@@ -10,8 +10,8 @@ import (
 	"github.com/alexey-mavrin/graduate-2/internal/common"
 )
 
-// ListRecordsType lists account for the current user
-func (c *Client) ListRecordsType(t common.RecordType) (common.Records, error) {
+// ListRecordsByType lists account for the current user
+func (c *Client) ListRecordsByType(t common.RecordType) (common.Records, error) {
 	var records common.Records
 	path := fmt.Sprintf("/records/by_type/%s", t)
 	req, err := c.prepaReq(http.MethodGet, path, nil)
@@ -48,8 +48,8 @@ func (c *Client) ListRecordsType(t common.RecordType) (common.Records, error) {
 	return records, nil
 }
 
-// DeleteRecordID returns account record with the given id
-func (c *Client) DeleteRecordID(id int64) error {
+// DeleteRecordByID returns account record with the given id
+func (c *Client) DeleteRecordByID(id int64) error {
 	path := fmt.Sprintf("/records/%d", id)
 	req, err := c.prepaReq(http.MethodDelete, path, nil)
 	if err != nil {
@@ -89,8 +89,8 @@ func (c *Client) DeleteRecordID(id int64) error {
 	return nil
 }
 
-// GetRecordID returns account record with the given id
-func (c *Client) GetRecordID(id int64) (common.Record, error) {
+// GetRecordByID returns account record with the given id
+func (c *Client) GetRecordByID(id int64) (common.Record, error) {
 	var record common.Record
 
 	path := fmt.Sprintf("/records/%d", id)
@@ -134,8 +134,8 @@ func (c *Client) GetRecordID(id int64) (common.Record, error) {
 	return record, nil
 }
 
-// UpdateRecordID updates account record with the given id
-func (c *Client) UpdateRecordID(id int64, record common.Record) error {
+// UpdateRecordByID updates account record with the given id
+func (c *Client) UpdateRecordByID(id int64, record common.Record) error {
 	body, err := json.Marshal(record)
 	if err != nil {
 		return err

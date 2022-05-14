@@ -9,7 +9,7 @@ func (c *Client) cacheDeleteRecordID(id int64) error {
 	if c.CacheFile == "" {
 		return nil
 	}
-	err := c.Store.DeleteRecordID(c.UserName, id)
+	err := c.Store.DeleteRecordByID(c.UserName, id)
 	if err != nil {
 		return err
 	}
@@ -28,12 +28,12 @@ func (c *Client) cacheRecordID(storeID int64, record common.Record) error {
 		return err
 	}
 
-	err = c.Store.DeleteRecordID(c.UserName, storeID)
+	err = c.Store.DeleteRecordByID(c.UserName, storeID)
 	if err != nil && err != store.ErrNotFound {
 		return err
 	}
 
-	err = c.Store.StoreRecordID(storeID, c.UserName, record)
+	err = c.Store.StoreRecordWithID(storeID, c.UserName, record)
 	if err != nil {
 		return err
 	}
@@ -44,7 +44,7 @@ func (c *Client) cacheGetRecordID(id int64) (common.Record, error) {
 	if c.CacheFile == "" {
 		return common.Record{}, nil
 	}
-	return c.Store.GetRecordID(c.UserName, id)
+	return c.Store.GetRecordByID(c.UserName, id)
 }
 
 func (c *Client) cacheListRecords() (common.Records, error) {
@@ -60,5 +60,5 @@ func (c *Client) cacheListRecordsType(t common.RecordType) (common.Records, erro
 	if c.CacheFile == "" {
 		return records, nil
 	}
-	return c.Store.ListRecordsType(c.UserName, t)
+	return c.Store.ListRecordsByType(c.UserName, t)
 }

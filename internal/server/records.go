@@ -52,7 +52,7 @@ func listRecordsType(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	records, err := serverStore.ListRecordsType(user, recordType)
+	records, err := serverStore.ListRecordsByType(user, recordType)
 	if err != nil {
 		log.Print(err)
 		writeStatus(w,
@@ -87,7 +87,7 @@ func getRecordID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	record, err := serverStore.GetRecordID(user, int64(id))
+	record, err := serverStore.GetRecordByID(user, int64(id))
 	if err == store.ErrNotFound {
 		msg := fmt.Sprintf("Record id %d not found", id)
 		log.Print(msg)
@@ -126,7 +126,7 @@ func getRecordTypeName(w http.ResponseWriter, r *http.Request) {
 	recordType := common.RecordType(chi.URLParam(r, "record_type"))
 	recordName := chi.URLParam(r, "record_name")
 
-	record, err := serverStore.GetRecordTypeName(user, recordType, recordName)
+	record, err := serverStore.GetRecordByTypeName(user, recordType, recordName)
 	if err == store.ErrNotFound {
 		msg := fmt.Sprintf("Record %s of type %s not found",
 			recordName, recordType)
@@ -169,7 +169,7 @@ func deleteRecordID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = serverStore.DeleteRecordID(user, int64(id))
+	err = serverStore.DeleteRecordByID(user, int64(id))
 	if err == store.ErrNotFound {
 		msg := fmt.Sprintf("Record id %d not found", id)
 		log.Print(msg)
@@ -200,7 +200,7 @@ func deleteRecordTypeName(w http.ResponseWriter, r *http.Request) {
 	recordType := common.RecordType(chi.URLParam(r, "record_type"))
 	recordName := chi.URLParam(r, "record_name")
 
-	err := serverStore.DeleteRecordTypeName(user, recordType, recordName)
+	err := serverStore.DeleteRecordByTypeName(user, recordType, recordName)
 	if err == store.ErrNotFound {
 		msg := fmt.Sprintf("Record %s of type %s not found",
 			recordName, recordType)
@@ -311,7 +311,7 @@ func updateRecordID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	resp.Name = record.Name
-	err = serverStore.UpdateRecordID(user, int64(id), record)
+	err = serverStore.UpdateRecordByID(user, int64(id), record)
 
 	if err != nil {
 		log.Printf("update record error: %v", err)
@@ -367,7 +367,7 @@ func updateRecordTypeName(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	resp.Name = record.Name
-	err = serverStore.UpdateRecordTypeName(user, recordType, recordName, record)
+	err = serverStore.UpdateRecordByTypeName(user, recordType, recordName, record)
 
 	if err != nil {
 		log.Printf("update record error: %v", err)

@@ -42,7 +42,7 @@ func listRecords(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func listRecordsType(w http.ResponseWriter, r *http.Request) {
+func listRecordsByType(w http.ResponseWriter, r *http.Request) {
 	recordType := common.RecordType(chi.URLParam(r, "record_type"))
 	log.Print("listRecords " + recordType)
 
@@ -72,7 +72,7 @@ func listRecordsType(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getRecordID(w http.ResponseWriter, r *http.Request) {
+func getRecordByID(w http.ResponseWriter, r *http.Request) {
 	log.Print("getRecordID")
 
 	user, _, ok := r.BasicAuth()
@@ -114,7 +114,7 @@ func getRecordID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getRecordTypeName(w http.ResponseWriter, r *http.Request) {
+func getRecordByTypeName(w http.ResponseWriter, r *http.Request) {
 	log.Print("getRecordTypeName")
 
 	user, _, ok := r.BasicAuth()
@@ -154,7 +154,7 @@ func getRecordTypeName(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func deleteRecordID(w http.ResponseWriter, r *http.Request) {
+func deleteRecordByID(w http.ResponseWriter, r *http.Request) {
 	log.Print("deleteRecordID")
 
 	user, _, ok := r.BasicAuth()
@@ -188,7 +188,7 @@ func deleteRecordID(w http.ResponseWriter, r *http.Request) {
 	writeStatus(w, http.StatusOK, "OK")
 }
 
-func deleteRecordTypeName(w http.ResponseWriter, r *http.Request) {
+func deleteRecordByTypeName(w http.ResponseWriter, r *http.Request) {
 	log.Print("deleteRecordTypeName")
 
 	user, _, ok := r.BasicAuth()
@@ -274,7 +274,7 @@ func storeRecord(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func updateRecordID(w http.ResponseWriter, r *http.Request) {
+func updateRecordByID(w http.ResponseWriter, r *http.Request) {
 	log.Print("updateRecordID")
 
 	user, _, ok := r.BasicAuth()
@@ -333,7 +333,7 @@ func updateRecordID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func updateRecordTypeName(w http.ResponseWriter, r *http.Request) {
+func updateRecordByTypeName(w http.ResponseWriter, r *http.Request) {
 	log.Print("updateRecordTypeName")
 
 	user, _, ok := r.BasicAuth()

@@ -31,6 +31,7 @@
    обновляется. Операция `list` локального кэша не обновляет, но при недоступности
    сервера выводит содержимое локального кэша.
 1. Удаление: при успешном удалении с сервера запись из локального кэша удаляется.
+1. Предусмотрены операции очистки кэша и единовременного кэширования всех данных.
 
 ## Ключи командрной строки клиента
 Общая схема:
@@ -40,7 +41,7 @@ go run cmd/client/main.go MODE -a ACTION flags
 гдеs
 * `MODE` - один из `user`, `cache`, `acc`, `note`, `card` или `bin`
 * `ACTION`
-  * для режима `user` один из `register` или `verify`
+  * для режима `user` один из `register`, `verify` или `password`
   * для режима `cache` один из `clean` или `sync`
   * для режимов `acc`, `note` или `card` - один из
     `list`, `store`, `get`, `update` или `delete`
@@ -49,59 +50,58 @@ go run cmd/client/main.go MODE -a ACTION flags
   * для режима `acc`:
     ```
     -i int
-    	account ID
-    -l string
-    	account URL
-    -m string
-    	account metainfo
+    	record ID
     -n string
     	account name
+    -l string
+    	account URL
     -p string
     	account password
     -u string
     	account user name
+    -m string
+    	account metainfo
     ```
   * для режима `note`:
     ```
     -i int
-    	note ID
-    -m string
-    	note metainfo
+    	record ID
     -n string
     	note name
     -t string
     	note text
+    -m string
+    	note metainfo
     ```
   * для режима `card`:
     ```
-    -c string
-    	card CVC code
+    -i int
+    	record ID
+    -n string
+    	card name
     -ch string
     	card holder
+    -num string
+    	card number
+    -c string
+    	card CVC code
     -em int
     	card expiry month
     -ey int
     	card expiry year
-    -i int
-    	card ID
     -m string
     	card metainfo
-    -n string
-    	card name
-    -num string
-    	card number
     ```
   * для режима `bin`:
     ```
-    -a string
-    	action: list|store|get|update|delete (default "list")
-    -f string
-    	file name
     -i int
     	binary record ID
     -n string
     	binary record name
-
+    -f string
+    	file name
+    -m string
+    	bin record metainfo
     ```
 
 

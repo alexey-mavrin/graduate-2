@@ -172,3 +172,22 @@ func (s *Store) AddUser(user common.User) (int64, error) {
 	}
 	return id, nil
 }
+
+// ChangeUserPassword takes username and new passwords and replace password
+func (s *Store) ChangeUserPassword(user, newPass string) error {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	hash := sha256.Sum256([]byte(newPass))
+	passwordHash := hex.EncodeToString(hash[:])
+
+	_, err := s.db.Exec(`UPDATE users
+		SET password_hash = ?
+		where user = ?`,
+		passwordHash, user,
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}

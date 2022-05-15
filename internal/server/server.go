@@ -126,6 +126,7 @@ func NewRouter() chi.Router {
 	r.Use(authUser)
 
 	r.Post("/users", createUser)
+	r.Put("/password", changePassword)
 	r.Get("/ping", pingHandler)
 	r.Post("/records", storeRecord)
 	r.Get("/records", listRecords)

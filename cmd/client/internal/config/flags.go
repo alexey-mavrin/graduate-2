@@ -35,15 +35,15 @@ const (
 	// OpSubtypeUserVerify is the user auth verification
 	OpSubtypeUserVerify
 
-	// OpSubtypeRecordStore is the account record creation
+	// OpSubtypeRecordStore is the record creation
 	OpSubtypeRecordStore
-	// OpSubtypeRecordGet is the account regord retrieval
+	// OpSubtypeRecordGet is the regord retrieval
 	OpSubtypeRecordGet
-	// OpSubtypeRecordList is the listing of account records
+	// OpSubtypeRecordList is the listing of records
 	OpSubtypeRecordList
-	// OpSubtypeRecordUpdate is the account record update
+	// OpSubtypeRecordUpdate is the record update
 	OpSubtypeRecordUpdate
-	// OpSubtypeRecordDelete is the removal of the account record
+	// OpSubtypeRecordDelete is the removal of the record
 	OpSubtypeRecordDelete
 	// OpSubtypeOther is unknown operation
 	OpSubtypeOther
@@ -87,10 +87,10 @@ func actionType(a *string) OpSubtype {
 // ParseFlags parses cmd line arguments
 func ParseFlags() error {
 	userFlags := flag.NewFlagSet("user", flag.ExitOnError)
-	accFlags := flag.NewFlagSet("acc", flag.ExitOnError)
-	noteFlags := flag.NewFlagSet("note", flag.ExitOnError)
-	cardFlags := flag.NewFlagSet("card", flag.ExitOnError)
-	binFlags := flag.NewFlagSet("bin", flag.ExitOnError)
+	accFlags := flag.NewFlagSet(string(common.AccountRecord), flag.ExitOnError)
+	noteFlags := flag.NewFlagSet(string(common.NoteRecord), flag.ExitOnError)
+	cardFlags := flag.NewFlagSet(string(common.CardRecord), flag.ExitOnError)
+	binFlags := flag.NewFlagSet(string(common.BinaryRecord), flag.ExitOnError)
 
 	userAction := userFlags.String("a", "verify", "action: verify|register")
 
@@ -142,13 +142,13 @@ func ParseFlags() error {
 	switch os.Args[1] {
 	case "user":
 		userFlags.Parse(os.Args[2:])
-	case "acc":
+	case string(common.AccountRecord):
 		accFlags.Parse(os.Args[2:])
-	case "note":
+	case string(common.NoteRecord):
 		noteFlags.Parse(os.Args[2:])
-	case "card":
+	case string(common.CardRecord):
 		cardFlags.Parse(os.Args[2:])
-	case "bin":
+	case string(common.BinaryRecord):
 		binFlags.Parse(os.Args[2:])
 	default:
 		return errors.New("unknown mode")

@@ -102,85 +102,13 @@ var _ = Describe("Run server and client together", func() {
 			Expect(err).NotTo(HaveOccurred(), "Client should register")
 		})
 
-		It("Should store and retrieve account", func() {
-			By("Running 'client acc'")
-			_, _, err := runClient("user -a register")
-			Expect(err).NotTo(HaveOccurred(), "Client should register")
+		It("Should store and retrieve account", storeAndGetAccount)
 
-			stdOut, stdErr, err := runClient(
-				"acc -a store -n acc_name_1, -u u1 -p pass1",
-			)
-			fmt.Print(stdOut, stdErr)
-			Expect(err).NotTo(HaveOccurred(), "Client should run OK")
-			stdOut, stdErr, err = runClient(
-				"acc -a get -i 1",
-			)
-			fmt.Print(stdOut, stdErr)
-			Expect(err).NotTo(HaveOccurred(), "Client should run OK")
-		})
+		It("Should store and retrieve note", storeAndGetNote)
 
-		It("Should store and retrieve note", func() {
-			By("Running 'client note'")
-			_, _, err := runClient("user -a register")
-			Expect(err).NotTo(HaveOccurred(), "Client should register")
+		It("Should store and retrieve card", storeAndGetCard)
 
-			stdOut, stdErr, err := runClient(
-				"note -a store -n note_name_1, -t text1",
-			)
-			fmt.Print(stdOut, stdErr)
-			Expect(err).NotTo(HaveOccurred(), "Client should run OK")
-			stdOut, stdErr, err = runClient(
-				"note -a get -i 1",
-			)
-			fmt.Print(stdOut, stdErr)
-			Expect(err).NotTo(HaveOccurred(), "Client should run OK")
-		})
-
-		It("Should store and retrieve card", func() {
-			By("Running 'client card'")
-			_, _, err := runClient("user -a register")
-			Expect(err).NotTo(HaveOccurred(), "Client should register")
-
-			stdOut, stdErr, err := runClient(
-				"card -a store -n c1 -num 1111222233334444 -c 123",
-			)
-			fmt.Print(stdOut, stdErr)
-			Expect(err).NotTo(HaveOccurred(), "Client should run OK")
-			stdOut, stdErr, err = runClient(
-				"card -a get -i 1",
-			)
-			fmt.Print(stdOut, stdErr)
-			Expect(err).NotTo(HaveOccurred(), "Client should run OK")
-		})
-
-		It("Should store and retrieve binary data", func() {
-			By("Running 'client bin'")
-			_, _, err := runClient("user -a register")
-			Expect(err).NotTo(HaveOccurred(), "Client should register")
-
-			file, err := makeBinFile(256)
-			Expect(err).NotTo(HaveOccurred(), "Binary file is created")
-			stdOut, stdErr, err := runClient(
-				fmt.Sprintf("bin -a store -n bin1 -f %s", file),
-			)
-			fmt.Print(stdOut, stdErr)
-
-			fileOut := file + ".out"
-			Expect(err).NotTo(HaveOccurred(), "Client should run OK")
-			stdOut, stdErr, err = runClient(
-				fmt.Sprintf("bin -a get -i 1 -f %s", fileOut),
-			)
-			fmt.Print(stdOut, stdErr)
-			Expect(err).NotTo(HaveOccurred(), "Client should run OK")
-
-			h1, err := getHash(file)
-			Expect(err).NotTo(HaveOccurred(), "Get original file hash")
-			h2, err := getHash(fileOut)
-			Expect(err).NotTo(HaveOccurred(), "Get saved file hash")
-			Expect(h1).To(Equal(h2), "Files should be the same")
-			os.Remove(file)
-			os.Remove(fileOut)
-		})
+		It("Should store and retrieve binary data", storeAndGetBinary)
 	})
 })
 

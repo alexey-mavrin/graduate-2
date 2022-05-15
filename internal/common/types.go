@@ -52,13 +52,13 @@ type RecordType string
 
 const (
 	// AccountRecord is the Account record type
-	AccountRecord RecordType = "account"
+	AccountRecord RecordType = "acc"
 	// NoteRecord is the Note record type
 	NoteRecord RecordType = "note"
 	// CardRecord is the Card record type
 	CardRecord RecordType = "card"
 	// BinaryRecord is the Binary record type
-	BinaryRecord RecordType = "binary"
+	BinaryRecord RecordType = "bin"
 	// UnspecifiedRecord is the unspecified record type
 	UnspecifiedRecord RecordType = ""
 )

@@ -45,10 +45,28 @@ func storeAndDeleteCard() {
 	)
 }
 
+func storeAndUpdateAccount() {
+	storeAndUpdate(common.AccountRecord,
+		"-l http://localhost -u us1 -p pass1",
+	)
+}
+
+func storeAndUpdateNote() {
+	storeAndUpdate(common.NoteRecord,
+		"-t text1",
+	)
+}
+
+func storeAndUpdateCard() {
+	storeAndUpdate(common.CardRecord,
+		"-num 1111222233334444 -em 12 -ey 2027 -c 123",
+	)
+}
+
 func storeAndGet(rt common.RecordType,
 	data string,
 ) {
-	By(fmt.Sprintf("Running 'client %s'", rt))
+	By(fmt.Sprintf("Running 'client %s get'", rt))
 	_, _, err := runClient("user -a register")
 	Expect(err).NotTo(HaveOccurred(), "Client should register")
 
@@ -76,10 +94,55 @@ func storeAndGet(rt common.RecordType,
 
 }
 
+func storeAndUpdate(rt common.RecordType,
+	data string,
+) {
+	By(fmt.Sprintf("Running 'client %s update'", rt))
+	_, _, err := runClient("user -a register")
+	Expect(err).NotTo(HaveOccurred(), "Client should register")
+
+	// store initial record
+	stdOut, stdErr, err := runClient(
+		fmt.Sprintf("%s -a store -n name_1 %s", rt, data),
+	)
+	fmt.Print(stdOut, stdErr)
+	Expect(err).NotTo(HaveOccurred(),
+		fmt.Sprintf("Client should store %s", rt),
+	)
+
+	// rename (update) record using ID
+	stdOut, stdErr, err = runClient(
+		fmt.Sprintf("%s -a update -i 1 -n name_01", rt),
+	)
+	fmt.Print(stdOut, stdErr)
+	Expect(err).NotTo(HaveOccurred(),
+		fmt.Sprintf("Client should rename %s by ID", rt),
+	)
+
+	// update record using new name
+	stdOut, stdErr, err = runClient(
+		fmt.Sprintf("%s -a update -n name_01 -m some_metainfo", rt),
+	)
+	fmt.Print(stdOut, stdErr)
+	Expect(err).NotTo(HaveOccurred(),
+		fmt.Sprintf("Client should update %s by name", rt),
+	)
+
+	stdOut, stdErr, err = runClient(
+		fmt.Sprintf("%s -a get -n name_01", rt),
+	)
+	fmt.Print(stdOut, stdErr)
+	Expect(stdOut).To(ContainSubstring("some_metainfo"))
+	Expect(err).NotTo(HaveOccurred(),
+		fmt.Sprintf("Client should retrieve %s by name", rt),
+	)
+
+}
+
 func storeAndDelete(rt common.RecordType,
 	data string,
 ) {
-	By(fmt.Sprintf("Running 'client %s'", rt))
+	By(fmt.Sprintf("Running 'client %s delete'", rt))
 	_, _, err := runClient("user -a register")
 	Expect(err).NotTo(HaveOccurred(), "Client should register")
 
@@ -121,7 +184,7 @@ func storeAndDelete(rt common.RecordType,
 }
 
 func storeAndGetBinary() {
-	By("Running 'client bin'")
+	By("Running 'client bin get'")
 	_, _, err := runClient("user -a register")
 	Expect(err).NotTo(HaveOccurred(), "Client should register")
 

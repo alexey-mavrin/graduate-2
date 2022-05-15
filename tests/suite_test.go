@@ -115,6 +115,12 @@ var _ = Describe("Run server and client together", func() {
 		It("Should store and delete note", storeAndDeleteNote)
 
 		It("Should store and delete card", storeAndDeleteCard)
+
+		It("Should store and update account record", storeAndUpdateAccount)
+
+		It("Should store and update note", storeAndUpdateNote)
+
+		It("Should store and update card", storeAndUpdateCard)
 	})
 })
 

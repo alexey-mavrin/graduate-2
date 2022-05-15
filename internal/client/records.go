@@ -197,6 +197,18 @@ func (c *Client) GetRecordByID(id int64) (common.Record, error) {
 	return record, nil
 }
 
+// UpdateRecordByTypeName updates record with the given type and name
+func (c *Client) UpdateRecordByTypeName(t common.RecordType,
+	name string,
+	record common.Record,
+) error {
+	id, err := c.GetRecordID(t, name)
+	if err != nil {
+		return err
+	}
+	return c.UpdateRecordByID(id, record)
+}
+
 // UpdateRecordByID updates record with the given id
 func (c *Client) UpdateRecordByID(id int64, record common.Record) error {
 	body, err := json.Marshal(record)

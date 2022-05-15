@@ -90,7 +90,15 @@ func actRecord(subop config.OpSubtype, subrecord common.Opaque) error {
 		if err != nil {
 			return err
 		}
-		err = clnt.UpdateRecordByID(config.Op.RecordID, eRecord)
+
+		if config.Op.RecordID != 0 {
+			err = clnt.UpdateRecordByID(config.Op.RecordID, eRecord)
+		} else {
+			err = clnt.UpdateRecordByTypeName(config.Op.RecordType,
+				config.Op.RecordName,
+				eRecord,
+			)
+		}
 		if err != nil {
 			return err
 		}

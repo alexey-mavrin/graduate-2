@@ -20,7 +20,7 @@ const (
 	// OpTypeUser is for user operations
 	OpTypeUser OpType = iota
 	// OpTypeCache is for user operations
-	OpTypeCache OpType = iota
+	OpTypeCache
 	// OpTypeAccount is for account operations
 	OpTypeAccount
 	// OpTypeNote is for note operations
@@ -36,6 +36,8 @@ const (
 	OpSubtypeUserRegister OpSubtype = iota
 	// OpSubtypeUserVerify is the user auth verification
 	OpSubtypeUserVerify
+	// OpSubtypeUserPasswordChange is for changing the password
+	OpSubtypeUserPasswordChange
 
 	// OpSubtypeCacheSync is the cache sync
 	OpSubtypeCacheSync OpSubtype = iota
@@ -100,7 +102,8 @@ func ParseFlags() error {
 	cardFlags := flag.NewFlagSet(string(common.CardRecord), flag.ExitOnError)
 	binFlags := flag.NewFlagSet(string(common.BinaryRecord), flag.ExitOnError)
 
-	userAction := userFlags.String("a", "verify", "action: verify|register")
+	userAction := userFlags.String("a", "verify", "action: verify|register|password")
+	userPass := userFlags.String("p", "", "new password")
 
 	cacheAction := cacheFlags.String("a", "sync", "action: sync|clean")
 
@@ -173,9 +176,12 @@ func ParseFlags() error {
 			Op.Subop = OpSubtypeUserVerify
 		case "register":
 			Op.Subop = OpSubtypeUserRegister
+		case "password":
+			Op.Subop = OpSubtypeUserPasswordChange
 		default:
 			return errors.New("unknown user action")
 		}
+		Op.User.Password = *userPass
 	} else if cacheFlags.Parsed() {
 		Op.Op = OpTypeCache
 		switch *cacheAction {

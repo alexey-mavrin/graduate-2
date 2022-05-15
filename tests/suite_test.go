@@ -102,13 +102,19 @@ var _ = Describe("Run server and client together", func() {
 			Expect(err).NotTo(HaveOccurred(), "Client should register")
 		})
 
-		It("Should store and retrieve account", storeAndGetAccount)
+		It("Should store and retrieve account record", storeAndGetAccount)
 
 		It("Should store and retrieve note", storeAndGetNote)
 
 		It("Should store and retrieve card", storeAndGetCard)
 
 		It("Should store and retrieve binary data", storeAndGetBinary)
+
+		It("Should store and delete account record", storeAndDeleteAccount)
+
+		It("Should store and delete note", storeAndDeleteNote)
+
+		It("Should store and delete card", storeAndDeleteCard)
 	})
 })
 

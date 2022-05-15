@@ -27,6 +27,24 @@ func storeAndGetCard() {
 	)
 }
 
+func storeAndDeleteAccount() {
+	storeAndDelete(common.AccountRecord,
+		"-l http://localhost -u us1 -p pass1",
+	)
+}
+
+func storeAndDeleteNote() {
+	storeAndDelete(common.NoteRecord,
+		"-t text1",
+	)
+}
+
+func storeAndDeleteCard() {
+	storeAndDelete(common.CardRecord,
+		"-num 1111222233334444 -em 12 -ey 2027 -c 123",
+	)
+}
+
 func storeAndGet(rt common.RecordType,
 	data string,
 ) {
@@ -56,6 +74,50 @@ func storeAndGet(rt common.RecordType,
 		fmt.Sprintf("Client should retrieve %s by name", rt),
 	)
 
+}
+
+func storeAndDelete(rt common.RecordType,
+	data string,
+) {
+	By(fmt.Sprintf("Running 'client %s'", rt))
+	_, _, err := runClient("user -a register")
+	Expect(err).NotTo(HaveOccurred(), "Client should register")
+
+	// store record 1
+	stdOut, stdErr, err := runClient(
+		fmt.Sprintf("%s -a store -n name_1 %s", rt, data),
+	)
+	fmt.Print(stdOut, stdErr)
+	Expect(err).NotTo(HaveOccurred(),
+		fmt.Sprintf("Client should store %s", rt),
+	)
+
+	// store record 2
+	stdOut, stdErr, err = runClient(
+		fmt.Sprintf("%s -a store -n name_2 %s", rt, data),
+	)
+	fmt.Print(stdOut, stdErr)
+	Expect(err).NotTo(HaveOccurred(),
+		fmt.Sprintf("Client should store %s", rt),
+	)
+
+	// delete record by ID
+	stdOut, stdErr, err = runClient(
+		fmt.Sprintf("%s -a delete -n name_1", rt),
+	)
+	fmt.Print(stdOut, stdErr)
+	Expect(err).NotTo(HaveOccurred(),
+		fmt.Sprintf("Client should delete %s by name", rt),
+	)
+
+	// delete record by name
+	stdOut, stdErr, err = runClient(
+		fmt.Sprintf("%s -a delete -n name_2", rt),
+	)
+	fmt.Print(stdOut, stdErr)
+	Expect(err).NotTo(HaveOccurred(),
+		fmt.Sprintf("Client should delete %s by name", rt),
+	)
 }
 
 func storeAndGetBinary() {

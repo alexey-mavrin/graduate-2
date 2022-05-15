@@ -96,11 +96,22 @@ func actRecord(subop config.OpSubtype, subrecord common.Opaque) error {
 		}
 		fmt.Println("record updated")
 	case config.OpSubtypeRecordDelete:
-		err := clnt.DeleteRecordByID(config.Op.RecordID)
-		if err != nil {
-			return err
+		if config.Op.RecordID != 0 {
+			err := clnt.DeleteRecordByID(config.Op.RecordID)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("Record %d deleted\n", config.Op.RecordID)
+		} else {
+			err := clnt.DeleteRecordByTypeName(
+				config.Op.RecordType,
+				config.Op.RecordName,
+			)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("Record %s deleted\n", config.Op.RecordName)
 		}
-		fmt.Printf("Record %d deleted\n", config.Op.RecordID)
 	}
 	return nil
 }

@@ -48,6 +48,58 @@ func (c *Client) ListRecordsByType(t common.RecordType) (common.Records, error) 
 	return records, nil
 }
 
+// GetRecordID returns ID of the record with the given type and name
+func (c *Client) GetRecordID(t common.RecordType,
+	name string,
+) (int64, error) {
+	var getIDResp common.StoreRecordResponse
+
+	path := fmt.Sprintf("/records/%s/%s", t, name)
+	req, err := c.prepaReq(http.MethodGet, path, nil)
+	if err != nil {
+		return 0, err
+	}
+
+	client := c.httpClient()
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Printf("cannot contact the server: %v, trying local cache", err)
+		return c.cacheGetRecordID(t, name)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		err = fmt.Errorf(
+			"get record: http status %d",
+			resp.StatusCode,
+		)
+		return 0, err
+	}
+
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return 0, err
+	}
+
+	err = json.Unmarshal(respBody, &getIDResp)
+	if err != nil {
+		return 0, err
+	}
+
+	return getIDResp.ID, nil
+}
+
+// DeleteRecordByTypeName returns record with the given type and name
+func (c *Client) DeleteRecordByTypeName(t common.RecordType,
+	name string,
+) error {
+	id, err := c.GetRecordID(t, name)
+	if err != nil {
+		return err
+	}
+	return c.DeleteRecordByID(id)
+}
+
 // DeleteRecordByID deletes record record with the given id
 func (c *Client) DeleteRecordByID(id int64) error {
 	path := fmt.Sprintf("/records/%d", id)
@@ -143,47 +195,6 @@ func (c *Client) GetRecordByID(id int64) (common.Record, error) {
 	}
 
 	return record, nil
-}
-
-// GetRecordID returns ID of the record with the given type and name
-func (c *Client) GetRecordID(t common.RecordType,
-	name string,
-) (int64, error) {
-	var getIDResp common.StoreRecordResponse
-
-	path := fmt.Sprintf("/records/%s/%s", t, name)
-	req, err := c.prepaReq(http.MethodGet, path, nil)
-	if err != nil {
-		return 0, err
-	}
-
-	client := c.httpClient()
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Printf("cannot contact the server: %v, trying local cache", err)
-		return c.cacheGetRecordID(t, name)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		err = fmt.Errorf(
-			"get record: http status %d",
-			resp.StatusCode,
-		)
-		return 0, err
-	}
-
-	respBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return 0, err
-	}
-
-	err = json.Unmarshal(respBody, &getIDResp)
-	if err != nil {
-		return 0, err
-	}
-
-	return getIDResp.ID, nil
 }
 
 // UpdateRecordByID updates record with the given id

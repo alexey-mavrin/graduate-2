@@ -10,6 +10,36 @@ import (
 	"github.com/alexey-mavrin/graduate-2/internal/common"
 )
 
+// ChangePassword attempts to change current user password
+func (c Client) ChangePassword(user common.User) error {
+	body, err := json.Marshal(user)
+	if err != nil {
+		return err
+	}
+
+	req, err := c.prepaReq(http.MethodPut, "/password", body)
+	if err != nil {
+		return err
+	}
+
+	client := c.httpClient()
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		err = fmt.Errorf(
+			"change password: http status %d",
+			resp.StatusCode,
+		)
+		return err
+	}
+
+	return nil
+}
+
 // VerifyUser attempts to authenticate current user
 func (c Client) VerifyUser() error {
 	req, err := c.prepaReq(http.MethodGet, "/ping", nil)

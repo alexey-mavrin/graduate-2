@@ -9,6 +9,15 @@ import (
 	"github.com/alexey-mavrin/graduate-2/internal/common"
 )
 
+const minPasswordLen = 5
+
+func checkPasswordRequirements(password string) bool {
+	if len(password) < minPasswordLen {
+		return false
+	}
+	return true
+}
+
 func actUser(subop config.OpSubtype, user common.User) error {
 	clnt := client.NewClient(config.Cfg.ServerAddr,
 		config.Cfg.UserName,
@@ -29,6 +38,16 @@ func actUser(subop config.OpSubtype, user common.User) error {
 			return err
 		}
 		log.Printf("user is verified")
+	case config.OpSubtypeUserPasswordChange:
+		ok := checkPasswordRequirements(config.Op.User.Password)
+		if !ok {
+			return errors.New("password does not match requirements")
+		}
+		err := clnt.ChangePassword(config.Op.User)
+		if err != nil {
+			return err
+		}
+		log.Printf("password is changed")
 	}
 	return nil
 }

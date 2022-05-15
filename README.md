@@ -38,9 +38,10 @@
 go run cmd/client/main.go MODE -a ACTION flags
 ```
 гдеs
-* `MODE` - один из `user`, `acc`, `note`, `card`
+* `MODE` - один из `user`, `cache`, `acc`, `note`, `card` или `bin`
 * `ACTION`
   * для режима `user` один из `register` или `verify`
+  * для режима `cache` один из `clean` или `sync`
   * для режимов `acc`, `note` или `card` - один из
     `list`, `store`, `get`, `update` или `delete`
 * `flags`:
@@ -249,6 +250,16 @@ go run cmd/client/main.go MODE -a ACTION flags
        Name: REC_NAME
        File FILE_NAME is written
      ```
+1. Очистка локального кэша
+   ```
+   go run cmd/client/main.go cache -a clean
+   2022/05/15 17:39:59 cache is cleaned
+   ```
+1. Синхронизация кэша с данными сервера
+   ```
+   go run cmd/client/main.go cache -a sync
+   2022/05/15 17:36:57 cache is synchronized
+   ```
 1. Работа от другого пользователя: создать другой файл конфигурации,
    именить его параметры, указать через переменную окружения:
    ```
@@ -284,8 +295,6 @@ go run cmd/client/main.go MODE -a ACTION flags
 * Вынести настройку тайм-аута клиента http в конфигурационный файл
 * добавить установку прав доступа 0600 к файлу кэша; однако, секретные
   записи в кэше зашифрованы, так что, возможно, это не требуется
-* добавить ключ "clear cache"
-* Добавить кеширование всех пользовательских данных по запросу единовременно
 * Сделать сообщения об ошибках более user friendly. Например, при попытке создания
   записи с повторяющимся именем и типом, клиент сейчас пишет
   ```

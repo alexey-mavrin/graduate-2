@@ -44,7 +44,7 @@ func listRecords(w http.ResponseWriter, r *http.Request) {
 
 func listRecordsByType(w http.ResponseWriter, r *http.Request) {
 	recordType := common.RecordType(chi.URLParam(r, "record_type"))
-	log.Print("listRecords " + recordType)
+	log.Print("listRecordsByType " + recordType)
 
 	user, _, ok := r.BasicAuth()
 	if !ok {
@@ -73,7 +73,7 @@ func listRecordsByType(w http.ResponseWriter, r *http.Request) {
 }
 
 func getRecordByID(w http.ResponseWriter, r *http.Request) {
-	log.Print("getRecordID")
+	log.Print("getRecordByID")
 
 	user, _, ok := r.BasicAuth()
 	if !ok {

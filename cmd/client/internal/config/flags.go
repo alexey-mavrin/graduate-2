@@ -19,6 +19,8 @@ type (
 const (
 	// OpTypeUser is for user operations
 	OpTypeUser OpType = iota
+	// OpTypeCache is for user operations
+	OpTypeCache OpType = iota
 	// OpTypeAccount is for account operations
 	OpTypeAccount
 	// OpTypeNote is for note operations
@@ -34,6 +36,11 @@ const (
 	OpSubtypeUserRegister OpSubtype = iota
 	// OpSubtypeUserVerify is the user auth verification
 	OpSubtypeUserVerify
+
+	// OpSubtypeCacheSync is the cache sync
+	OpSubtypeCacheSync OpSubtype = iota
+	// OpSubtypeCacheClean is the cache cleaning
+	OpSubtypeCacheClean
 
 	// OpSubtypeRecordStore is the record creation
 	OpSubtypeRecordStore
@@ -87,12 +94,15 @@ func actionType(a *string) OpSubtype {
 // ParseFlags parses cmd line arguments
 func ParseFlags() error {
 	userFlags := flag.NewFlagSet("user", flag.ExitOnError)
+	cacheFlags := flag.NewFlagSet("cache", flag.ExitOnError)
 	accFlags := flag.NewFlagSet(string(common.AccountRecord), flag.ExitOnError)
 	noteFlags := flag.NewFlagSet(string(common.NoteRecord), flag.ExitOnError)
 	cardFlags := flag.NewFlagSet(string(common.CardRecord), flag.ExitOnError)
 	binFlags := flag.NewFlagSet(string(common.BinaryRecord), flag.ExitOnError)
 
 	userAction := userFlags.String("a", "verify", "action: verify|register")
+
+	cacheAction := cacheFlags.String("a", "sync", "action: sync|clean")
 
 	accAction := accFlags.String("a",
 		"list",
@@ -142,6 +152,8 @@ func ParseFlags() error {
 	switch os.Args[1] {
 	case "user":
 		userFlags.Parse(os.Args[2:])
+	case "cache":
+		cacheFlags.Parse(os.Args[2:])
 	case string(common.AccountRecord):
 		accFlags.Parse(os.Args[2:])
 	case string(common.NoteRecord):
@@ -163,6 +175,14 @@ func ParseFlags() error {
 			Op.Subop = OpSubtypeUserRegister
 		default:
 			return errors.New("unknown user action")
+		}
+	} else if cacheFlags.Parsed() {
+		Op.Op = OpTypeCache
+		switch *cacheAction {
+		case "sync":
+			Op.Subop = OpSubtypeCacheSync
+		case "clean":
+			Op.Subop = OpSubtypeCacheClean
 		}
 	} else if accFlags.Parsed() {
 		Op.Op = OpTypeAccount

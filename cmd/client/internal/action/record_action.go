@@ -43,7 +43,16 @@ func actRecord(subop config.OpSubtype, subrecord common.Opaque) error {
 		}
 		fmt.Printf("record stored with id %d\n", id)
 	case config.OpSubtypeRecordGet:
-		eRecord, err := clnt.GetRecordByID(config.Op.RecordID)
+		var eRecord common.Record
+		var err error
+		if config.Op.RecordID != 0 {
+			eRecord, err = clnt.GetRecordByID(config.Op.RecordID)
+		} else {
+			eRecord, err = clnt.GetRecordByTypeName(
+				config.Op.RecordType,
+				config.Op.RecordName,
+			)
+		}
 		if err != nil {
 			return err
 		}
@@ -81,17 +90,36 @@ func actRecord(subop config.OpSubtype, subrecord common.Opaque) error {
 		if err != nil {
 			return err
 		}
-		err = clnt.UpdateRecordByID(config.Op.RecordID, eRecord)
+
+		if config.Op.RecordID != 0 {
+			err = clnt.UpdateRecordByID(config.Op.RecordID, eRecord)
+		} else {
+			err = clnt.UpdateRecordByTypeName(config.Op.RecordType,
+				config.Op.RecordName,
+				eRecord,
+			)
+		}
 		if err != nil {
 			return err
 		}
 		fmt.Println("record updated")
 	case config.OpSubtypeRecordDelete:
-		err := clnt.DeleteRecordByID(config.Op.RecordID)
-		if err != nil {
-			return err
+		if config.Op.RecordID != 0 {
+			err := clnt.DeleteRecordByID(config.Op.RecordID)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("Record %d deleted\n", config.Op.RecordID)
+		} else {
+			err := clnt.DeleteRecordByTypeName(
+				config.Op.RecordType,
+				config.Op.RecordName,
+			)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("Record %s deleted\n", config.Op.RecordName)
 		}
-		fmt.Printf("Record %d deleted\n", config.Op.RecordID)
 	}
 	return nil
 }

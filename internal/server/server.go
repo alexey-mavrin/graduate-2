@@ -131,11 +131,9 @@ func NewRouter() chi.Router {
 	r.Get("/records", listRecords)
 	r.Get("/records/by_type/{record_type}", listRecordsByType)
 	r.Get("/records/{id}", getRecordByID)
-	r.Get("/records/{record_type}/{record_name}", getRecordByTypeName)
+	r.Get("/records/{record_type}/{record_name}", getRecordID)
 	r.Put("/records/{id}", updateRecordByID)
-	r.Put("/records/{record_type}/{record_name}", updateRecordByTypeName)
 	r.Delete("/records/{id}", deleteRecordByID)
-	r.Delete("/records/{record_type}/{record_name}", deleteRecordByTypeName)
 
 	return r
 }

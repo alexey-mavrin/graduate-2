@@ -47,6 +47,24 @@ func (c *Client) cacheGetRecordByID(id int64) (common.Record, error) {
 	return c.Store.GetRecordByID(c.UserName, id)
 }
 
+func (c *Client) cacheGetRecordID(t common.RecordType,
+	name string,
+) (int64, error) {
+	if c.CacheFile == "" {
+		return 0, nil
+	}
+	return c.Store.GetRecordID(c.UserName, t, name)
+}
+
+func (c *Client) cacheGetRecordByTypeName(t common.RecordType,
+	name string,
+) (common.Record, error) {
+	if c.CacheFile == "" {
+		return common.Record{}, nil
+	}
+	return c.Store.GetRecordByTypeName(c.UserName, t, name)
+}
+
 func (c *Client) cacheListRecords() (common.Records, error) {
 	records := make(common.Records)
 	if c.CacheFile == "" {

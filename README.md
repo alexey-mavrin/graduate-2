@@ -184,7 +184,7 @@ go run cmd/client/main.go MODE -a ACTION flags
      Type: account
      Name: My account
    ```
-1. Обновить аккаунт
+1. Обновить аккаунт по ID
    ```
    $ go run cmd/client/main.go acc -a update \
        -i 2 \
@@ -195,7 +195,17 @@ go run cmd/client/main.go MODE -a ACTION flags
        -m "second account, Meta Info"
    record updated
    ```
-1. Получить запись аккаунта:
+1. Обновить аккаунт по имени
+   ```
+   $ go run cmd/client/main.go acc -a update \
+       -n "Another account" \
+       -u user22 \
+       -p passW0RD \
+       -l https://example.org:4433 \
+       -m "second account, Meta Info"
+   record updated
+   ```
+1. Получить запись аккаунта по ID:
    ```
    $ go run cmd/client/main.go acc -a get -i 2
 
@@ -204,12 +214,28 @@ go run cmd/client/main.go MODE -a ACTION flags
     Meta info: second account, Meta Info
     Data: {"url":"https://example.org:4433","user_name":"user22","password":"passW0RD"}
    ```
-1. Удалить аккаунт:
+1. Получить запись аккаунта по имени:
+   ```
+   $ go run cmd/client/main.go acc -a get -n "Another account"
+
+    Type: account
+    Name: Another account
+    Meta info: second account, Meta Info
+    Data: {"url":"https://example.org:4433","user_name":"user22","password":"passW0RD"}
+   ```
+1. Удалить аккаунт по ID:
    ```
    $ go run cmd/client/main.go acc -a delete -i 1
    Record 1 deleted
    ```
-1. Для бинарных данных использование таково:
+1. Удалить аккаунт по имени:
+   ```
+   $ go run cmd/client/main.go acc -a delete -n "Another account"
+   Record 1 deleted
+   ```
+
+1. Для бинарных данных использование предполагает задание имени файла
+   для исходных данных или для их сохранения на локальной машине.
    * для сохранения содержимого файла `FILE_NAME` на сервере:
      ```
      go run cmd/client/main.go bin -a store -n REC_NAME -f FILE_NAME

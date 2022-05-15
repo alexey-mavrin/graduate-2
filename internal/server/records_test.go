@@ -119,53 +119,6 @@ func Test_Record(t *testing.T) {
 		assert.Equal(t, updateRecord, gotRecord)
 	})
 
-	t.Run("Update record by type and name", func(t *testing.T) {
-		router := prepareTest(t)
-		recName := "rec1"
-		recType := common.NoteRecord
-		record := common.Record{
-			Name:   recName,
-			Opaque: "0000",
-			Type:   recType,
-		}
-		id := storeTestRecord(t, router, record)
-
-		updateRecord := common.Record{
-			Name:   recName,
-			Opaque: "1111",
-			Type:   recType,
-		}
-		updateRecordBody, err := json.Marshal(updateRecord)
-		assert.NoError(t, err)
-
-		updateResp, _ := testHTTPRequest(t,
-			router,
-			http.MethodPut,
-			fmt.Sprintf("/records/%s/%s", recType, recName),
-			string(updateRecordBody),
-			testUser,
-			testPass,
-		)
-		defer updateResp.Body.Close()
-		assert.Equal(t, http.StatusOK, updateResp.StatusCode)
-
-		getResp, getRespBody := testHTTPRequest(t,
-			router,
-			http.MethodGet,
-			fmt.Sprintf("/records/%d", id),
-			"",
-			testUser,
-			testPass,
-		)
-		defer getResp.Body.Close()
-		assert.Equal(t, http.StatusOK, getResp.StatusCode)
-
-		var gotRecord common.Record
-		err = json.Unmarshal([]byte(getRespBody), &gotRecord)
-		assert.NoError(t, err)
-		assert.Equal(t, updateRecord, gotRecord)
-	})
-
 	t.Run("Get record by ID", func(t *testing.T) {
 		router := prepareTest(t)
 		record := common.Record{
@@ -191,7 +144,7 @@ func Test_Record(t *testing.T) {
 		assert.Equal(t, record, gotRecord)
 	})
 
-	t.Run("Get record by type and name", func(t *testing.T) {
+	t.Run("Get record ID by type and name", func(t *testing.T) {
 		router := prepareTest(t)
 		recName := "rec1"
 		recType := common.NoteRecord
@@ -200,7 +153,7 @@ func Test_Record(t *testing.T) {
 			Opaque: "0000",
 			Type:   recType,
 		}
-		_ = storeTestRecord(t, router, record)
+		id := storeTestRecord(t, router, record)
 		getResp, getRespBody := testHTTPRequest(t,
 			router,
 			http.MethodGet,
@@ -212,10 +165,10 @@ func Test_Record(t *testing.T) {
 		defer getResp.Body.Close()
 		assert.Equal(t, http.StatusOK, getResp.StatusCode)
 
-		var gotRecord common.Record
-		err := json.Unmarshal([]byte(getRespBody), &gotRecord)
+		var gotResp common.StoreRecordResponse
+		err := json.Unmarshal([]byte(getRespBody), &gotResp)
 		assert.NoError(t, err)
-		assert.Equal(t, record, gotRecord)
+		assert.Equal(t, id, gotResp.ID)
 	})
 
 	t.Run("List records", func(t *testing.T) {
@@ -278,40 +231,6 @@ func Test_Record(t *testing.T) {
 			router,
 			http.MethodGet,
 			fmt.Sprintf("/records/%d", id),
-			"",
-			testUser,
-			testPass,
-		)
-		defer delResp2.Body.Close()
-		assert.Equal(t, http.StatusNotFound, delResp2.StatusCode)
-	})
-
-	t.Run("Delete record by type and name", func(t *testing.T) {
-		router := prepareTest(t)
-		recName := "rec1"
-		recType := common.NoteRecord
-		record := common.Record{
-			Name:   recName,
-			Opaque: "0000",
-			Type:   recType,
-		}
-		_ = storeTestRecord(t, router, record)
-
-		delResp, _ := testHTTPRequest(t,
-			router,
-			http.MethodDelete,
-			fmt.Sprintf("/records/%s/%s", recType, recName),
-			"",
-			testUser,
-			testPass,
-		)
-		defer delResp.Body.Close()
-		assert.Equal(t, http.StatusOK, delResp.StatusCode)
-
-		delResp2, _ := testHTTPRequest(t,
-			router,
-			http.MethodGet,
-			fmt.Sprintf("/records/%s/%s", recType, recName),
 			"",
 			testUser,
 			testPass,

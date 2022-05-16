@@ -185,15 +185,27 @@ go run cmd/client/main.go MODE -a ACTION flags
      Type: account
      Name: My account
    ```
-1. Обновить аккаунт по ID
+1. Обновить данные аккаунта по ID
    ```
    $ go run cmd/client/main.go acc -a update \
        -i 2 \
-       -n "Another account" \
        -u user22 \
        -p passW0RD \
        -l https://example.org:4433 \
-       -m "second account, Meta Info"
+   record updated
+   ```
+1. Обновить метаданные по ID
+   ```
+   $ go run cmd/client/main.go acc -a update \
+       -i 2 \
+       -m "second account, Meta Info: new info"
+   record updated
+   ```
+1. Обновить имя записи по ID
+   ```
+   $ go run cmd/client/main.go acc -a update \
+       -i 2 \
+       -n "Yet another account" \
    record updated
    ```
 1. Обновить аккаунт по имени
@@ -296,8 +308,6 @@ go run cmd/client/main.go MODE -a ACTION flags
 
 ## Возможные улучшения
 * Добавить проверки параметров командной строки на валидность и лимиты
-* В режиме обновления записи дать возможность указывать только обновляемые поля,
-   а те, что не указаны - не изменять
 * Вынести настройку тайм-аута клиента http в конфигурационный файл
 * Добавить ключ по принудительной работе с локальным кэшем, без обращения
   к серверу

@@ -59,20 +59,43 @@ const (
 	OpSubtypeOther
 )
 
+// RequestedChange indicates if name, opaque or meta of the record
+// is requested to change
+type RequestedChange struct {
+	Name   bool
+	Opaque bool
+	Meta   bool
+}
+
 // Operation describes the current operation type
 type Operation struct {
-	Op         OpType
-	Subop      OpSubtype
-	User       common.User
-	Account    common.Account
-	Note       common.Note
-	Card       common.Card
-	Binary     common.Binary
-	RecordID   int64
-	RecordName string
-	RecordMeta string
-	RecordType common.RecordType
-	FileName   string
+	Op           OpType
+	Subop        OpSubtype
+	User         common.User
+	Account      common.Account
+	accountFlags []string
+	Note         common.Note
+	noteFlags    []string
+	Card         common.Card
+	cardFlags    []string
+	Binary       common.Binary
+	binaryFlags  []string
+	RecordChange RequestedChange
+	RecordID     int64
+	RecordName   string
+	RecordMeta   string
+	RecordType   common.RecordType
+	FileName     string
+}
+
+func isFlagPassed(set *flag.FlagSet, name string) bool {
+	found := false
+	set.Visit(func(f *flag.Flag) {
+		if f.Name == name {
+			found = true
+		}
+	})
+	return found
 }
 
 // Op describes the current operation
@@ -89,6 +112,18 @@ func Usage(msg string) {
 	fmt.Println("usage: 'client MODE -a ACTION flags'")
 	fmt.Println("  where MODE is one of user, cache, acc, note, card or bin")
 	fmt.Println("  run 'client MODE -h' for further help")
+}
+
+func checkChanges(set *flag.FlagSet, opaqueFlags []string) RequestedChange {
+	var r RequestedChange
+	r.Name = isFlagPassed(set, "n")
+	for _, fl := range opaqueFlags {
+		if isFlagPassed(set, fl) {
+			r.Opaque = true
+		}
+	}
+	r.Meta = isFlagPassed(set, "m")
+	return r
 }
 
 func actionType(a *string) OpSubtype {
@@ -126,9 +161,12 @@ func ParseFlags() error {
 		"action: list|store|get|update|delete",
 	)
 	accName := accFlags.String("n", "", "account name")
+	// opaque flags
 	accUserName := accFlags.String("u", "", "account user name")
 	accPassword := accFlags.String("p", "", "account password")
 	accURL := accFlags.String("l", "", "account URL")
+	Op.accountFlags = []string{"u", "p", "l"}
+
 	accMeta := accFlags.String("m", "", "account metainfo")
 	accID := accFlags.Int64("i", 0, "account ID")
 
@@ -137,7 +175,10 @@ func ParseFlags() error {
 		"action: list|store|get|update|delete",
 	)
 	noteName := noteFlags.String("n", "", "note name")
+	// opaque flags
 	noteText := noteFlags.String("t", "", "note text")
+	Op.noteFlags = []string{"t"}
+
 	noteMeta := noteFlags.String("m", "", "note metainfo")
 	noteID := noteFlags.Int64("i", 0, "note ID")
 
@@ -146,11 +187,14 @@ func ParseFlags() error {
 		"action: list|store|get|update|delete",
 	)
 	cardName := cardFlags.String("n", "", "card name")
+	// opaque flags
 	cardHolder := cardFlags.String("ch", "", "card holder")
 	cardNumber := cardFlags.String("num", "", "card number")
 	cardExpMonth := cardFlags.Int("em", 0, "card expiry month")
 	cardExpYear := cardFlags.Int("ey", 0, "card expiry year")
 	cardCVC := cardFlags.String("c", "", "card CVC code")
+	Op.cardFlags = []string{"ch", "num", "em", "ey", "c"}
+
 	cardMeta := cardFlags.String("m", "", "card metainfo")
 	cardID := cardFlags.Int64("i", 0, "card ID")
 
@@ -159,7 +203,10 @@ func ParseFlags() error {
 		"action: list|store|get|update|delete",
 	)
 	binName := binFlags.String("n", "", "binary record name")
+	// opaque flags
 	binFile := binFlags.String("f", "", "file name")
+	Op.binaryFlags = []string{"f"}
+
 	binID := binFlags.Int64("i", 0, "binary record ID")
 
 	if len(os.Args) < 2 {
@@ -215,6 +262,7 @@ func ParseFlags() error {
 		Op.Account.URL = *accURL
 		Op.RecordMeta = *accMeta
 		Op.RecordID = *accID
+		Op.RecordChange = checkChanges(accFlags, Op.accountFlags)
 	} else if noteFlags.Parsed() {
 		Op.Op = OpTypeNote
 		Op.RecordType = common.NoteRecord
@@ -224,6 +272,7 @@ func ParseFlags() error {
 		Op.Note.Text = *noteText
 		Op.RecordMeta = *noteMeta
 		Op.RecordID = *noteID
+		Op.RecordChange = checkChanges(noteFlags, Op.noteFlags)
 	} else if cardFlags.Parsed() {
 		Op.Op = OpTypeCard
 		Op.RecordType = common.CardRecord
@@ -237,6 +286,7 @@ func ParseFlags() error {
 		Op.Card.CVC = *cardCVC
 		Op.RecordMeta = *cardMeta
 		Op.RecordID = *cardID
+		Op.RecordChange = checkChanges(cardFlags, Op.cardFlags)
 	} else if binFlags.Parsed() {
 		Op.Op = OpTypeBinary
 		Op.RecordType = common.BinaryRecord
@@ -252,6 +302,7 @@ func ParseFlags() error {
 			return err
 		}
 		Op.RecordID = *binID
+		Op.RecordChange = checkChanges(binFlags, Op.binaryFlags)
 	}
 
 	return nil

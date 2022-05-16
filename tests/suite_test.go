@@ -86,7 +86,7 @@ var _ = Describe("Run server and client together", func() {
 		cleanUp()
 		srvCmd, cmdErr = startServer()
 		Expect(cmdErr).NotTo(HaveOccurred(), "Server should start")
-		time.Sleep(time.Second * 1)
+		time.Sleep(time.Millisecond * 200)
 	})
 
 	AfterEach(func() {

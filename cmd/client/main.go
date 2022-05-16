@@ -31,6 +31,10 @@ func main() {
 	}
 
 	err = config.ParseFlags()
+	if err == config.ErrUnknownMode {
+		config.Usage("unknown mode is choosen")
+		os.Exit(0)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}

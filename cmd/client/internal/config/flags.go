@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"flag"
+	"fmt"
 	"os"
 
 	"github.com/alexey-mavrin/graduate-2/internal/common"
@@ -76,6 +77,19 @@ type Operation struct {
 
 // Op describes the current operation
 var Op Operation
+
+// ErrUnknownMode returned when unknown operation mode is requested
+var ErrUnknownMode = errors.New("unknown mode")
+
+// Usage prints the usage info: flag format, etc.
+func Usage(msg string) {
+	if msg != "" {
+		fmt.Println(msg)
+	}
+	fmt.Println("usage: 'client MODE -a ACTION flags'")
+	fmt.Println("  where MODE is one of user, cache, acc, note, card or bin")
+	fmt.Println("  run 'client MODE -h' for further help")
+}
 
 func actionType(a *string) OpSubtype {
 	switch *a {
@@ -166,7 +180,7 @@ func ParseFlags() error {
 	case string(common.BinaryRecord):
 		binFlags.Parse(os.Args[2:])
 	default:
-		return errors.New("unknown mode")
+		return ErrUnknownMode
 	}
 
 	if userFlags.Parsed() {

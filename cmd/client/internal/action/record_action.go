@@ -27,6 +27,12 @@ func actRecord(subop config.OpSubtype, subrecord common.Opaque) error {
 			Type: config.Op.RecordType,
 			Meta: config.Op.RecordMeta,
 		}
+
+		err := subrecord.Check()
+		if err != nil {
+			return err
+		}
+
 		opaque, err := subrecord.Pack()
 		if err != nil {
 			return err
@@ -80,6 +86,12 @@ func actRecord(subop config.OpSubtype, subrecord common.Opaque) error {
 			Type: config.Op.RecordType,
 			Meta: config.Op.RecordMeta,
 		}
+
+		err := subrecord.Check()
+		if err != nil {
+			return err
+		}
+
 		opaque, err := subrecord.Pack()
 		if err != nil {
 			return err

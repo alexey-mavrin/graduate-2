@@ -23,7 +23,7 @@ func storeAndGetNote() {
 
 func storeAndGetCard() {
 	storeAndGet(common.CardRecord,
-		"-num 1111222233334444 -em 12 -ey 2027 -c 123",
+		"-ch CardHolder -num 1111222233334444 -em 12 -ey 2027 -c 123",
 	)
 }
 
@@ -41,7 +41,7 @@ func storeAndDeleteNote() {
 
 func storeAndDeleteCard() {
 	storeAndDelete(common.CardRecord,
-		"-num 1111222233334444 -em 12 -ey 2027 -c 123",
+		"-ch CardHolder -num 1111222233334444 -em 12 -ey 2027 -c 123",
 	)
 }
 
@@ -59,7 +59,7 @@ func storeAndUpdateNote() {
 
 func storeAndUpdateCard() {
 	storeAndUpdate(common.CardRecord,
-		"-num 1111222233334444 -em 12 -ey 2027 -c 123",
+		"-ch CardHolder -num 1111222233334444 -em 12 -ey 2027 -c 123",
 	)
 }
 

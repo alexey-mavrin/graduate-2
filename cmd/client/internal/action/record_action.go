@@ -13,6 +13,40 @@ import (
 
 const defaultFileMode = 0600
 
+func getRecord(clnt *client.Client) (common.Record, error) {
+	var eRecord common.Record
+	var err error
+	if config.Op.RecordID != 0 {
+		eRecord, err = clnt.GetRecordByID(config.Op.RecordID)
+	} else {
+		eRecord, err = clnt.GetRecordByTypeName(
+			config.Op.RecordType,
+			config.Op.RecordName,
+		)
+	}
+	if err != nil {
+		return eRecord, err
+	}
+	record, err := crypt.DecryptRecord(*config.Key, eRecord)
+	if err != nil {
+		return record, err
+	}
+	return record, nil
+}
+
+func mergeRecord(newRecord, oldRecord common.Record) common.Record {
+	if !config.Op.RecordChange.Name {
+		newRecord.Name = oldRecord.Name
+	}
+	if !config.Op.RecordChange.Opaque {
+		newRecord.Opaque = oldRecord.Opaque
+	}
+	if !config.Op.RecordChange.Meta {
+		newRecord.Meta = oldRecord.Meta
+	}
+	return newRecord
+}
+
 func actRecord(subop config.OpSubtype, subrecord common.Opaque) error {
 	clnt := client.NewClient(config.Cfg.ServerAddr,
 		config.Cfg.UserName,
@@ -49,24 +83,13 @@ func actRecord(subop config.OpSubtype, subrecord common.Opaque) error {
 		}
 		fmt.Printf("record stored with id %d\n", id)
 	case config.OpSubtypeRecordGet:
-		var eRecord common.Record
-		var err error
-		if config.Op.RecordID != 0 {
-			eRecord, err = clnt.GetRecordByID(config.Op.RecordID)
-		} else {
-			eRecord, err = clnt.GetRecordByTypeName(
-				config.Op.RecordType,
-				config.Op.RecordName,
-			)
-		}
+		record, err := getRecord(clnt)
 		if err != nil {
 			return err
 		}
-		record, err := crypt.DecryptRecord(*config.Key, eRecord)
-		if err != nil {
-			return err
-		}
+
 		fmt.Println(record)
+
 		if config.Op.RecordType == common.BinaryRecord {
 			err = writeDecodeFile(config.Op.FileName, record.Opaque)
 			if err != nil {
@@ -87,16 +110,29 @@ func actRecord(subop config.OpSubtype, subrecord common.Opaque) error {
 			Meta: config.Op.RecordMeta,
 		}
 
-		err := subrecord.Check()
-		if err != nil {
-			return err
+		// check opaque fields for validity if their change is requested
+		if config.Op.RecordChange.Opaque {
+			err := subrecord.Check()
+			if err != nil {
+				return err
+			}
 		}
 
+		// pack provided opaque fields
 		opaque, err := subrecord.Pack()
 		if err != nil {
 			return err
 		}
 		record.Opaque = string(opaque)
+
+		// use server-side data for unchanged name, meta or opaque
+		if !config.Op.RecordChange.Name || !config.Op.RecordChange.Opaque || !config.Op.RecordChange.Meta {
+			serverRecord, err := getRecord(clnt)
+			if err != nil {
+				return err
+			}
+			record = mergeRecord(record, serverRecord)
+		}
 
 		eRecord, err := crypt.EncryptRecord(*config.Key, record)
 		if err != nil {
